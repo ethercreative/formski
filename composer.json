@@ -1,0 +1,32 @@
+{
+  "name": "ether/formski",
+  "description": "A form building plugin for Craft CMS",
+  "version": "1.0.0",
+  "type": "craft-plugin",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Ether",
+      "homepage": "https://ethercreative.co.uk"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/ethercreative/formski/issues",
+    "source": "https://github.com/ethercreative/formski",
+    "docs": "https://github.com/ethercreative/formski"
+  },
+  "require": {
+    "craftcms/cms": "^3.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "ether\\formski\\": "src/"
+    }
+  },
+  "extra": {
+    "handle": "formski",
+    "name": "Formski",
+    "class": "ether\\formski\\Formski",
+    "sourceLanguage": "en-GB"
+  }
+}
