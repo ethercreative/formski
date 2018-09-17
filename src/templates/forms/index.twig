@@ -1,0 +1,15 @@
+{% extends '_layouts/elementindex' %}
+{% set title = 'Forms'|t('formski') %}
+{% set elementType = 'ether\\formski\\elements\\Form' %}
+{% set selectedSubnavItem = 'forms' %}
+
+{% block actionButton %}
+	<div class="buttons">
+		<a
+			class="btn submit add icon"
+			href="{{ url('formski/forms/new') }}"
+		>
+			{{- 'New Form'|t('formski') -}}
+		</a>
+	</div>
+{% endblock %}

@@ -9,6 +9,9 @@
 namespace ether\formski;
 
 use craft\base\Plugin;
+use craft\events\RegisterUrlRulesEvent;
+use craft\web\UrlManager;
+use yii\base\Event;
 
 /**
  * Class Formski
@@ -19,11 +22,65 @@ use craft\base\Plugin;
 class Formski extends Plugin
 {
 
+	// Properties
+	// =========================================================================
+
+	public $hasCpSection = true;
+
+	public $hasCpSettings = true;
+
+	public $schemaVersion = '1.0.0';
+
+	// Init
+	// =========================================================================
+
 	public function init ()
 	{
 		parent::init();
 
-		// ...
+		// Events
+		// ---------------------------------------------------------------------
+
+		Event::on(
+			UrlManager::class,
+			UrlManager::EVENT_REGISTER_CP_URL_RULES,
+			[$this, 'onRegisterCpUrlRules']
+		);
+	}
+
+	// Events
+	// =========================================================================
+
+	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
+	{
+		$event->rules['formski/forms'] = 'formski/forms';
+		$event->rules['formski/forms/new'] = 'formski/forms/edit';
+		$event->rules['formski/forms/<formId:\d+>'] = 'formski/forms/edit';
+	}
+
+	// Getters
+	// =========================================================================
+
+	public function getCpNavItem ()
+	{
+		$parent = parent::getCpNavItem();
+
+		$parent['subnav']['submissions'] = [
+			'label' => \Craft::t('formski', 'Submissions'),
+			'url'   => 'formski/submissions',
+		];
+
+		$parent['subnav']['forms'] = [
+			'label' => \Craft::t('formski', 'Forms'),
+			'url'   => 'formski/forms',
+		];
+
+		$parent['subnav']['settings'] = [
+			'label' => \Craft::t('app', 'Settings'),
+			'url'   => 'formski/settings',
+		];
+
+		return $parent;
 	}
 
 }
