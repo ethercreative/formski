@@ -1,12 +1,200 @@
 {% extends '_layouts/cp' %}
 {% set selectedSubnavItem = 'forms' %}
+{% set fullPageForm = true %}
 
 {% set crumbs = [
 	{ label: 'Forms'|t('formski'), url: url('formski/forms') }
 ] %}
 
+{% macro formskiLabel (children) %}
+	<div class="formski-field">
+		<div class="formski-field-label">
+			Label
+		</div>
+
+		{{ children }}
+	</div>
+{% endmacro %}
+
+{% set formskiDropZoneH -%}
+	<div class="formski-form-drop-h"></div>
+{%- endset %}
+
+{% set formskiDropZoneV -%}
+	<div class="formski-form-drop-v"></div>
+{%- endset %}
+
+{% import '_includes/forms' as forms %}
+{% import _self as _ %}
+
 {% block content %}
 
-	Hello world!
+	<ul class="formski-fields" id="formskiFields">
+		<li class="formski-fields-heading">Fields</li>
 
+		<li draggable="true" data-type="text">
+			{{ svg('@formskiWeb/assets/forms/icons/text.svg') }}
+			Text
+		</li>
+
+		<li draggable="true" data-type="textarea">
+			{{ svg('@formskiWeb/assets/forms/icons/text-area.svg') }}
+			Text Area
+		</li>
+
+		<li draggable="true" data-type="dropdown">
+			{{ svg('@formskiWeb/assets/forms/icons/dropdown.svg') }}
+			Dropdown
+		</li>
+
+		<li draggable="true" data-type="radio">
+			{{ svg('@formskiWeb/assets/forms/icons/radio.svg') }}
+			Radio Buttons
+		</li>
+
+		<li draggable="true" data-type="checkbox">
+			{{ svg('@formskiWeb/assets/forms/icons/checkbox.svg') }}
+			Checkboxes
+		</li>
+
+		<li draggable="true" data-type="acceptance">
+			Acceptance
+		</li>
+
+		<li class="formski-fields-heading">Other</li>
+
+		<li draggable="true" data-type="heading">
+			{{ svg('@formskiWeb/assets/forms/icons/heading.svg') }}
+			Heading
+		</li>
+
+		<li draggable="true" data-type="description">
+			{{ svg('@formskiWeb/assets/forms/icons/description.svg') }}
+			Description
+		</li>
+	</ul>
+
+	<div class="formski-form" id="formskiForm">
+		{{ formskiDropZoneH }}
+		{# TODO: Pre-fill existing fields #}
+	</div>
+
+	<aside class="formski-settings">
+		{% include '_includes/tabs' with {
+			tabs: {
+				formSettings:  { label: 'Form Settings', url: '#form-settings' },
+				fieldSettings: { label: 'Field Settings', url: '#field-settings' },
+			},
+		} %}
+
+		<div id="field-settings" class="hidden">
+			{# TODO: Pre-fill existing field settings #}
+			<div class="formski-settings-empty">
+				You don't have any fields.
+			</div>
+		</div>
+
+		<div id="form-settings" class="hidden">
+			<div class="meta">
+				{{ forms.textField({
+					label: 'Title',
+					name: 'title',
+					required: true,
+					placeholder: 'My Form'
+				}) }}
+
+				{{ forms.elementSelectField({
+					label: 'Author'|t('app'),
+					id: 'author',
+					name: 'author',
+					elementType: userElementType,
+					selectionLabel: 'Choose'|t('app'),
+					criteria: [],
+					limit: 1,
+					elements: (author is defined and author ? [author] : [currentUser])
+				}) }}
+
+				{{ forms.dateTimeField({
+					label: 'Date Due'|t('formski'),
+					id: 'dateDue',
+					name: 'dateDue'
+				}) }}
+
+				{{ forms.textField({
+					label: 'Days to Complete'|t('formski'),
+					type: 'number',
+				}) }}
+
+				{{ forms.lightswitchField({
+					label: 'Enabled',
+					name: 'enabled'
+				}) }}
+			</div>
+		</div>
+	</aside>
+
+{% endblock %}
+
+{% block foot %}
+	{{ parent() }}
+
+	<template id="formskiDropZoneH">
+		{{ formskiDropZoneH }}
+	</template>
+
+	<template id="formskiDropZoneV">
+		{{ formskiDropZoneV }}
+	</template>
+
+	<template id="formskiRow">
+		<div class="formski-form-row">
+			{{ formskiDropZoneV }}
+
+			<!-- Field -->
+
+			{{ formskiDropZoneV }}
+		</div>
+	</template>
+
+	<template data-formski-field="text">
+		{% set formskiText %}
+			<input type="text">
+		{% endset %}
+		{{ _.formskiLabel(formskiText) }}
+	</template>
+
+	<template data-formski-field="textarea">
+		{% set formskiTextArea %}
+			<textarea rows="5"></textarea>
+		{% endset %}
+		{{ _.formskiLabel(formskiTextArea) }}
+	</template>
+
+	<template data-formski-field="dropdown">
+		{% set formskiDropdown %}
+			<select></select>
+			<span></span>
+		{% endset %}
+		{{ _.formskiLabel(formskiDropdown) }}
+	</template>
+
+	<template data-formski-field="radio">
+		{% set formskiRadio %}
+			<label>
+				<input type="radio">
+				<span>Label</span>
+			</label>
+		{% endset %}
+		{{ _.formskiLabel(formskiRadio) }}
+	</template>
+
+	<template data-formski-field="checkbox">
+		{% set formskiCheckbox %}
+			<label>
+				<input type="checkbox">
+				<span>Label</span>
+			</label>
+		{% endset %}
+		{{ _.formskiLabel(formskiCheckbox) }}
+	</template>
 {% endblock %}

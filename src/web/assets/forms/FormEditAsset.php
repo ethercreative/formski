@@ -24,7 +24,11 @@ class FormEditAsset extends AssetBundle
 		$this->sourcePath = __DIR__;
 
 		$this->css = [
-			'edit-form.css',
+			'builder.css',
+		];
+
+		$this->js = [
+			'builder.js'
 		];
 
 		parent::init();

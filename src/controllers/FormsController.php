@@ -8,7 +8,9 @@
 
 namespace ether\formski\controllers;
 
+use craft\elements\User;
 use craft\web\Controller;
+use craft\web\View;
 use ether\formski\web\assets\forms\FormEditAsset;
 
 /**
@@ -31,11 +33,15 @@ class FormsController extends Controller
 	 */
 	public function actionEdit ()
 	{
+		$view = \Craft::$app->view;
+
 		$variables = [
 			'title' => 'Edit Form',
+			'userElementType' => User::class,
 		];
 
-		\Craft::$app->view->registerAssetBundle(FormEditAsset::class);
+		$view->registerAssetBundle(FormEditAsset::class);
+		$view->registerJs('new FormskiBuilder();', View::POS_END);
 
 		return $this->renderTemplate('formski/forms/_edit', $variables);
 	}

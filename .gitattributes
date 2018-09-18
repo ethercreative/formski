@@ -2,6 +2,7 @@
 
 .gitattributes export-ignore
 .gitignore export-ignore
+build.config.js export-ignore
 /resources export-ignore
 README.md export-ignore
 CHANGELOG.md export-ignore

@@ -38,6 +38,11 @@ class Formski extends Plugin
 	{
 		parent::init();
 
+		\Craft::setAlias(
+			'@formskiWeb',
+			__dir__ . '/web'
+		);
+
 		// Events
 		// ---------------------------------------------------------------------
 
