@@ -30,6 +30,9 @@
 {% import _self as _ %}
 
 {% block actionButton %}
+	{% if form is defined %}
+		<input type="hidden" name="id" value="{{ form.id }}">
+	{% endif %}
 	<input type="hidden" name="action" value="formski/forms/save">
 	{{ redirectInput('formski/forms/{id}') }}
 	{{ parent() }}
@@ -104,6 +107,7 @@
 					required: true,
 					placeholder: 'My Form',
 					value: form is defined ? form.title,
+					errors: form is defined ? form.getErrors('title')
 				}) }}
 
 				{{ forms.elementSelectField({
