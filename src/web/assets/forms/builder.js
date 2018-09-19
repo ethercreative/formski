@@ -90,9 +90,12 @@
 /*!*********************************!*\
   !*** ./resources/js/builder.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _helpers_h__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helpers/h */ "./resources/js/helpers/h.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
@@ -118,6 +121,8 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
 
 var Builder =
 /*#__PURE__*/
@@ -169,6 +174,36 @@ function () {
     _defineProperty(this, "onDeleteFieldClick", function (uid, e) {
       e.preventDefault();
       if (confirm("Are you sure?")) _this.deleteFieldByUid(uid);
+    });
+
+    _defineProperty(this, "onSettingChange", function (field, name, e) {
+      var value = e.target.value;
+
+      switch (name) {
+        case "label":
+          field.querySelector(".formski-field-label").textContent = value;
+          break;
+
+        case "instructions":
+          field.querySelector(".formski-field-instructions").textContent = value;
+          break;
+
+        case "type":
+          field.querySelector("input").setAttribute("type", value);
+          break;
+
+        case "placeholder":
+          field.querySelector("input,textarea").setAttribute("placeholder", value);
+          break;
+
+        case "rows":
+          field.querySelector("textarea").setAttribute("rows", value);
+          break;
+
+        case "required":
+          field.querySelector(".formski-field-label").classList[e.target.checked ? "add" : "remove"]("required");
+          break;
+      }
     });
 
     this.fieldsWrap = document.getElementById("formskiFields");
@@ -231,7 +266,7 @@ function () {
       layout.value = uid;
       field.appendChild(layout); // Create the settings
 
-      this.createFieldSettings(type, uid);
+      this.createFieldSettings(field, type, uid);
       return field;
     }
   }, {
@@ -337,7 +372,7 @@ function () {
 
   }, {
     key: "createFieldSettings",
-    value: function createFieldSettings(type, uid) {
+    value: function createFieldSettings(uiField, type, uid) {
       var fieldSettings = {
         handle: "",
         label: "Label",
@@ -352,7 +387,6 @@ function () {
           break;
 
         case "textarea":
-          fieldSettings.type = "text";
           fieldSettings.placeholder = "";
           fieldSettings.rows = 5;
           break;
@@ -392,7 +426,7 @@ function () {
             name = _arr$_i[0],
             value = _arr$_i[1];
 
-        var field = this.createSettingsField(uid, _typeof(value), name, value);
+        var field = this.createSettingsField(uiField, uid, _typeof(value), name, value);
         settingsDiv.appendChild(field);
       } // Footer
 
@@ -475,66 +509,72 @@ function () {
     }
   }, {
     key: "createSettingsField",
-    value: function createSettingsField(uid, type, name, value) {
-      var labelId = "label" + this.getUid(10);
-      var field = document.createElement("div");
-      field.classList.add("field");
-      var heading = document.createElement("div");
-      heading.classList.add("heading");
-      field.appendChild(heading);
-      var label = document.createElement("label");
-      label.setAttribute("id", labelId);
-      label.textContent = this.capitalize(name);
-      heading.appendChild(label);
-      var input = document.createElement("div");
-      input.classList.add("input");
-      field.appendChild(input);
+    value: function createSettingsField(uiField, uid, type, name, value) {
+      var labelId = "label" + this.getUid(10),
+          onSettingChange = this.onSettingChange.bind(this, uiField, name);
       var inputName = "fieldSettings[".concat(uid, "][").concat(name, "]");
+      var f;
 
       if (name === "type") {
-        var wrap = document.createElement("div");
-        wrap.className = "select";
-        input.appendChild(wrap);
-        var f = document.createElement("select");
-        f.setAttribute("name", inputName);
-        [["text", "Text"], ["email", "Email"], ["tel", "Phone"], ["url", "URL"], ["date", "Date"], ["time", "Time"], ["datetime-local", "Date Time"]].forEach(function (opt) {
-          var o = document.createElement("option");
-          o.setAttribute("value", opt[0]);
-          o.textContent = opt[1];
-          f.appendChild(o);
-        });
-        f.value = value;
-        wrap.appendChild(f);
-        return field;
+        f = Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
+          class: "select"
+        }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("select", {
+          name: inputName,
+          change: onSettingChange
+        }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
+          value: "text"
+        }, "Text"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
+          value: "email"
+        }, "Email"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
+          value: "tel"
+        }, "Phone"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
+          value: "url"
+        }, "URL"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
+          value: "date"
+        }, "Date"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
+          value: "time"
+        }, "Time"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
+          value: "datetime-local"
+        }, "Date Time")])]);
+      } else {
+        switch (type) {
+          case "boolean":
+            {
+              f = Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
+                type: "checkbox",
+                name: inputName,
+                input: onSettingChange
+              });
+              break;
+            }
+
+          case "object":
+            f = document.createTextNode("TODO: Table");
+            break;
+
+          default:
+            {
+              f = Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
+                class: "text fullwidth",
+                type: type === "number" ? "number" : "text",
+                autocomplete: "off",
+                name: inputName,
+                value: value,
+                input: onSettingChange
+              });
+            }
+        }
       }
 
-      switch (type) {
-        case "boolean":
-          input.textContent = "TODO: Lightswitch";
-          break;
-
-        case "object":
-          input.textContent = "TODO: Table";
-          break;
-
-        default:
-          {
-            var _f = document.createElement("input");
-
-            _f.className = "text fullwidth";
-
-            _f.setAttribute("type", type === "number" ? "number" : "text");
-
-            _f.setAttribute("autocomplete", "off");
-
-            _f.setAttribute("name", inputName);
-
-            _f.value = value;
-            input.appendChild(_f);
-          }
-      }
-
-      return field;
+      return Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
+        class: "field"
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
+        class: "heading"
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("label", {
+        id: labelId
+      }, this.capitalize(name))]), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
+        class: "input"
+      }, f)]);
     }
   }, {
     key: "getFriendlyTypeName",
@@ -568,6 +608,78 @@ _defineProperty(Builder, "_uidChars", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmno
 _defineProperty(Builder, "_uidCharsLength", Builder._uidChars.length);
 
 window.FormskiBuilder = Builder;
+
+/***/ }),
+
+/***/ "./resources/js/helpers/h.js":
+/*!***********************************!*\
+  !*** ./resources/js/helpers/h.js ***!
+  \***********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return createElement; });
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+/**
+ * ## Create Element
+ * Quick and easy DOM element creation
+ *
+ * @param {string=} tag - The element tag
+ * @param {object=} attributes - The attributes to add, mapping the key as
+ *     the attribute name, and the value as its value. If the value is a
+ *     function, it will be added as an event.
+ * @param {(Array|*)=} children - An array of children (can be a mixture of
+ *     Nodes to append, or other values to be stringified and appended
+ *     as text).
+ * @return {Element} - The created element
+ */
+function createElement() {
+  var tag = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "div";
+  var attributes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var children = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  var elem = document.createElement(tag);
+
+  var _arr = Object.entries(attributes);
+
+  for (var _i = 0; _i < _arr.length; _i++) {
+    var _arr$_i = _slicedToArray(_arr[_i], 2),
+        key = _arr$_i[0],
+        value = _arr$_i[1];
+
+    if (!value) continue;
+
+    if (_typeof(value) === _typeof(function () {})) {
+      if (key === "ref") value(elem);else elem.addEventListener(key, value);
+      continue;
+    }
+
+    if (key === "style") value = value.replace(/[\t\r\n]/g, " ").trim();
+    elem.setAttribute(key, value);
+  }
+
+  if (!Array.isArray(children)) children = [children];
+  children.map(function (child) {
+    if (!child) return;
+
+    try {
+      elem.appendChild(child);
+    } catch (_) {
+      elem.appendChild(document.createTextNode(child));
+    }
+  });
+  return elem;
+}
 
 /***/ })
 

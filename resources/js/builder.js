@@ -1,3 +1,5 @@
+import h from "./helpers/h";
+
 class Builder {
 
 	// Properties
@@ -88,7 +90,7 @@ class Builder {
 		field.appendChild(layout);
 
 		// Create the settings
-		this.createFieldSettings(type, uid);
+		this.createFieldSettings(field, type, uid);
 
 		return field;
 	}
@@ -216,7 +218,7 @@ class Builder {
 	// Actions: Field Settings
 	// -------------------------------------------------------------------------
 
-	createFieldSettings (type, uid) {
+	createFieldSettings (uiField, type, uid) {
 		const fieldSettings = {
 			handle: "",
 			label: "Label",
@@ -230,7 +232,6 @@ class Builder {
 				fieldSettings.placeholder = "";
 				break;
 			case "textarea":
-				fieldSettings.type = "text";
 				fieldSettings.placeholder = "";
 				fieldSettings.rows = 5;
 				break;
@@ -264,7 +265,7 @@ class Builder {
 
 		// Settings Fields
 		for (let [name, value] of Object.entries(fieldSettings)) {
-			const field = this.createSettingsField(uid, typeof value, name, value);
+			const field = this.createSettingsField(uiField, uid, typeof value, name, value);
 			settingsDiv.appendChild(field);
 		}
 
@@ -383,6 +384,35 @@ class Builder {
 			this.deleteFieldByUid(uid);
 	};
 
+	// Events: Settings Handlers
+	// -------------------------------------------------------------------------
+
+	onSettingChange = (field, name, e) => {
+		const value = e.target.value;
+
+		switch (name) {
+			case "label":
+				field.querySelector(".formski-field-label").textContent = value;
+				break;
+			case "instructions":
+				field.querySelector(".formski-field-instructions").textContent = value;
+				break;
+			case "type":
+				field.querySelector("input").setAttribute("type", value);
+				break;
+			case "placeholder":
+				field.querySelector("input,textarea").setAttribute("placeholder", value);
+				break;
+			case "rows":
+				field.querySelector("textarea").setAttribute("rows", value);
+				break;
+			case "required":
+				field.querySelector(".formski-field-label")
+					 .classList[e.target.checked ? "add" : "remove"]("required");
+				break;
+		}
+	};
+
 	// Helpers
 	// =========================================================================
 
@@ -414,75 +444,60 @@ class Builder {
 		return String.fromCharCode.apply(null, array);
 	}
 
-	createSettingsField (uid, type, name, value) {
-		const labelId = "label" + this.getUid(10);
-
-		const field = document.createElement("div");
-		field.classList.add("field");
-
-		const heading = document.createElement("div");
-		heading.classList.add("heading");
-		field.appendChild(heading);
-
-		const label = document.createElement("label");
-		label.setAttribute("id", labelId);
-		label.textContent = this.capitalize(name);
-		heading.appendChild(label);
-
-		const input = document.createElement("div");
-		input.classList.add("input");
-		field.appendChild(input);
+	createSettingsField (uiField, uid, type, name, value) {
+		const labelId = "label" + this.getUid(10)
+			, onSettingChange = this.onSettingChange.bind(this, uiField, name);
 
 		const inputName = `fieldSettings[${uid}][${name}]`;
+		let f;
 
 		if (name === "type") {
-			const wrap = document.createElement("div");
-			wrap.className = "select";
-			input.appendChild(wrap);
-
-			const f = document.createElement("select");
-			f.setAttribute("name", inputName);
-
-			[
-				["text", "Text"],
-				["email", "Email"],
-				["tel", "Phone"],
-				["url", "URL"],
-				["date", "Date"],
-				["time", "Time"],
-				["datetime-local", "Date Time"],
-			].forEach(opt => {
-				const o = document.createElement("option");
-				o.setAttribute("value", opt[0]);
-				o.textContent = opt[1];
-				f.appendChild(o);
-			});
-
-			f.value = value;
-			wrap.appendChild(f);
-
-			return field;
-		}
-
-		switch (type) {
-			case "boolean":
-				input.textContent = "TODO: Lightswitch";
-				break;
-			case "object":
-				input.textContent = "TODO: Table";
-				break;
-			default: {
-				const f = document.createElement("input");
-				f.className = "text fullwidth";
-				f.setAttribute("type", type === "number" ? "number" : "text");
-				f.setAttribute("autocomplete", "off");
-				f.setAttribute("name", inputName);
-				f.value = value;
-				input.appendChild(f);
+			f = h("div", { class: "select" }, [
+				h("select", {
+					name: inputName,
+					change: onSettingChange,
+				}, [
+					h("option", { value: "text" }, "Text"),
+					h("option", { value: "email" }, "Email"),
+					h("option", { value: "tel" }, "Phone"),
+					h("option", { value: "url" }, "URL"),
+					h("option", { value: "date" }, "Date"),
+					h("option", { value: "time" }, "Time"),
+					h("option", { value: "datetime-local" }, "Date Time"),
+				]),
+			]);
+		} else {
+			switch (type) {
+				case "boolean": {
+					f = h("input", {
+						type: "checkbox",
+						name: inputName,
+						input: onSettingChange,
+					});
+					break;
+				}
+				case "object":
+					f = document.createTextNode("TODO: Table");
+					break;
+				default: {
+					f = h("input", {
+						class: "text fullwidth",
+						type: type === "number" ? "number" : "text",
+						autocomplete: "off",
+						name: inputName,
+						value,
+						input: onSettingChange,
+					});
+				}
 			}
 		}
 
-		return field;
+		return h("div", { class: "field" }, [
+			h("div", { class: "heading" }, [
+				h("label", { id: labelId }, this.capitalize(name)),
+			]),
+			h("div", { class: "input" }, f)
+		]);
 	}
 
 	getFriendlyTypeName (type) {
