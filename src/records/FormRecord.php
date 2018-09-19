@@ -18,8 +18,11 @@ use yii\db\ActiveQueryInterface;
  * Class FormRecord
  *
  * @property int $id
+ * @property string $handle
+ * @property string $title
  * @property int $authorId
- * @property mixed $fields
+ * @property mixed $fieldLayout
+ * @property mixed $fieldSettings
  * @property \DateTime|null $dateDue
  * @property int|null $daysToComplete
  *
