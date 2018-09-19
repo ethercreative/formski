@@ -11,10 +11,13 @@ namespace ether\formski;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
 use craft\web\UrlManager;
+use ether\formski\services\FormService;
 use yii\base\Event;
 
 /**
  * Class Formski
+ *
+ * @property FormService $form
  *
  * @author  Ether Creative
  * @package ether\formski
@@ -42,6 +45,13 @@ class Formski extends Plugin
 			'@formskiWeb',
 			__dir__ . '/web'
 		);
+
+		// Components
+		// ---------------------------------------------------------------------
+
+		$this->setComponents([
+			'form' => FormService::class,
+		]);
 
 		// Events
 		// ---------------------------------------------------------------------

@@ -85,7 +85,7 @@ class Builder {
 		// Add layout input
 		const layout = document.createElement("input");
 		layout.setAttribute("type", "hidden");
-		layout.setAttribute("name", "fieldLayout[" + rowUid + "][]");
+		layout.setAttribute("name", "fieldLayout[][" + rowUid + "][]");
 		layout.value = uid;
 		field.appendChild(layout);
 
@@ -101,13 +101,6 @@ class Builder {
 
 		// Row UID
 		row.setAttribute("data-row-uid", uid);
-
-		// Row layout input
-		const layout = document.createElement("input");
-		layout.setAttribute("type", "hidden");
-		layout.setAttribute("name", "rowLayout[]");
-		layout.value = uid;
-		row.appendChild(layout);
 
 		return form.insertBefore(row, before);
 	}
@@ -220,7 +213,6 @@ class Builder {
 
 	createFieldSettings (uiField, type, uid) {
 		const fieldSettings = {
-			handle: "",
 			label: "Label",
 			instructions: "",
 			required: false,
@@ -244,46 +236,32 @@ class Builder {
 				break;
 		}
 
-		// Settings wrapping div
-		const settingsDiv = document.createElement("div");
-		settingsDiv.setAttribute("data-uid", uid);
-		settingsDiv.className = "meta hidden";
-		this.settingsWrap.appendChild(settingsDiv);
+		this.settingsWrap.appendChild(h("div", {
+			class: "meta hidden",
+			"data-uid": uid
+		}, [
+			h("div", {
+				class: "formski-settings-type",
+			}, this.getFriendlyTypeName(type)),
 
-		// Field Type
-		const fieldType = document.createElement("div");
-		fieldType.classList.add("formski-settings-type");
-		fieldType.textContent = this.getFriendlyTypeName(type);
-		settingsDiv.appendChild(fieldType);
+			h("input", {
+				type: "hidden",
+				name: `fieldSettings[${uid}][_type]`,
+				value: type,
+			}),
 
-		// Field Type input
-		const typeInput = document.createElement("input");
-		typeInput.setAttribute("type", "hidden");
-		typeInput.setAttribute("name", `fieldSettings[${uid}][_type]`);
-		typeInput.value = type;
-		settingsDiv.appendChild(typeInput);
+			...Object.entries(fieldSettings).map(([name, value]) => (
+				this.createSettingsField(uiField, uid, typeof value, name, value)
+			)),
 
-		// Settings Fields
-		for (let [name, value] of Object.entries(fieldSettings)) {
-			const field = this.createSettingsField(uiField, uid, typeof value, name, value);
-			settingsDiv.appendChild(field);
-		}
-
-		// Footer
-		const footer = document.createElement("footer");
-		footer.className = "footer";
-		settingsDiv.appendChild(footer);
-
-		// Delete
-		const deleteBtn = document.createElement("button");
-		deleteBtn.textContent = "Delete";
-		deleteBtn.className = "btn small";
-		deleteBtn.setAttribute("type", "button");
-		deleteBtn.addEventListener(
-			"click",
-			this.onDeleteFieldClick.bind(this, uid)
-		);
-		footer.appendChild(deleteBtn);
+			h("footer", { class: "footer" }, [
+				h("button", {
+					class: "btn small",
+					type: "button",
+					click: this.onDeleteFieldClick.bind(this, uid),
+				}, "Delete")
+			]),
+		]));
 	}
 
 	// Events
@@ -469,11 +447,19 @@ class Builder {
 		} else {
 			switch (type) {
 				case "boolean": {
-					f = h("input", {
-						type: "checkbox",
-						name: inputName,
-						input: onSettingChange,
-					});
+					f = [
+						h("input", {
+							type: "hidden",
+							name: inputName,
+							value: "0",
+						}),
+						h("input", {
+							type: "checkbox",
+							name: inputName,
+							value: "1",
+							input: onSettingChange,
+						}),
+					];
 					break;
 				}
 				case "object":

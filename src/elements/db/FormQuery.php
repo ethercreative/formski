@@ -55,7 +55,12 @@ class FormQuery extends ElementQuery
 		$this->joinElementTable('formski_forms');
 
 		$this->query->select([
+			'formski_forms.handle',
+			'formski_forms.title',
 			'formski_forms.authorId',
+			'formski_forms.fieldLayout',
+			'formski_forms.fieldSettings',
+			'formski_forms.daysToComplete',
 			'formski_forms.dateDue',
 		]);
 

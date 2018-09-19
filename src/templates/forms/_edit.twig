@@ -29,6 +29,12 @@
 {% import '_includes/forms' as forms %}
 {% import _self as _ %}
 
+{% block actionButton %}
+	<input type="hidden" name="action" value="formski/forms/save">
+	{{ redirectInput('formski/forms/{id}') }}
+	{{ parent() }}
+{% endblock %}
+
 {% block content %}
 
 	<ul class="formski-fields" id="formskiFields">
@@ -87,22 +93,17 @@
 				formSettings:  { label: 'Form Settings', url: '#form-settings' },
 				fieldSettings: { label: 'Field Settings', url: '#field-settings' },
 			},
+			selectedTab: selectedTab is defined ? selectedTab : 'formSettings',
 		} %}
 
-		<div id="field-settings" class="hidden">
-			{# TODO: Pre-fill existing field settings #}
-			<div class="formski-settings-empty">
-				You don't have any fields.
-			</div>
-		</div>
-
-		<div id="form-settings" class="hidden">
+		<div id="form-settings">
 			<div class="meta">
 				{{ forms.textField({
 					label: 'Title',
 					name: 'title',
 					required: true,
-					placeholder: 'My Form'
+					placeholder: 'My Form',
+					value: form is defined ? form.title,
 				}) }}
 
 				{{ forms.elementSelectField({
@@ -113,24 +114,34 @@
 					selectionLabel: 'Choose'|t('app'),
 					criteria: [],
 					limit: 1,
-					elements: (author is defined and author ? [author] : [currentUser])
+					elements: (form is defined and form.author ? [form.author] : [currentUser]),
 				}) }}
 
 				{{ forms.dateTimeField({
 					label: 'Date Due'|t('formski'),
 					id: 'dateDue',
-					name: 'dateDue'
+					name: 'dateDue',
+					value: form is defined ? form.dateDue,
 				}) }}
 
 				{{ forms.textField({
 					label: 'Days to Complete'|t('formski'),
 					type: 'number',
+					value: form is defined ? form.daysToComplete,
 				}) }}
 
 				{{ forms.lightswitchField({
 					label: 'Enabled',
-					name: 'enabled'
+					name: 'enabled',
+					on: form is defined and form.enabled ?? true,
 				}) }}
+			</div>
+		</div>
+
+		<div id="field-settings" class="hidden">
+			{# TODO: Pre-fill existing field settings #}
+			<div class="formski-settings-empty">
+				You don't have any fields.
 			</div>
 		</div>
 	</aside>

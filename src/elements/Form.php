@@ -13,9 +13,12 @@ use craft\db\Query;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\User;
 use craft\helpers\ArrayHelper;
+use craft\helpers\DateTimeHelper;
+use craft\helpers\Db;
 use craft\helpers\Json;
 use craft\helpers\UrlHelper;
 use craft\validators\DateTimeValidator;
+use ether\formski\elements\actions\Delete;
 use ether\formski\elements\db\FormQuery;
 use ether\formski\migrations\Install;
 use ether\formski\records\FormRecord;
@@ -36,8 +39,17 @@ class Form extends Element
 	// Properties: Public
 	// -------------------------------------------------------------------------
 
+	/** @var string */
+	public $handle;
+
+	/** @var string */
+	public $title;
+
 	/** @var array */
-	public $fields;
+	public $fieldLayout;
+
+	/** @var array */
+	public $fieldSettings;
 
 	/** @var int|null */
 	public $authorId;
@@ -83,7 +95,7 @@ class Form extends Element
 
 	public static function hasUris (): bool
 	{
-		return true;
+		return false;
 	}
 
 	public static function hasStatuses (): bool
@@ -94,6 +106,17 @@ class Form extends Element
 	public static function find (): ElementQueryInterface
 	{
 		return new FormQuery(self::class);
+	}
+
+	protected static function defineActions (string $source = null): array
+	{
+		$actions = [];
+
+		$actions[] = \Craft::$app->getElements()->createAction([
+			'type' => Delete::class,
+		]);
+
+		return $actions;
 	}
 
 	protected static function defineSources (string $context = null): array
@@ -204,7 +227,7 @@ class Form extends Element
 		$rules = parent::rules();
 
 		$rules[] = [['authorId', 'daysToComplete'], 'number', 'integerOnly' => true];
-		$rules[] = [['dueDate'], DateTimeValidator::class];
+		$rules[] = [['dateDue'], DateTimeValidator::class];
 
 		return $rules;
 	}
@@ -321,9 +344,12 @@ class Form extends Element
 				throw new \Exception('Invalid form ID: ' . $this->id);
 		}
 
+		$record->handle = $this->handle;
+		$record->title = $this->title;
 		$record->authorId = $this->authorId;
-		$record->fields = Json::encode($this->fields);
-		$record->dateDue = $this->dateDue;
+		$record->fieldLayout = Json::encode($this->fieldLayout);
+		$record->fieldSettings = Json::encode($this->fieldSettings);
+		$record->dateDue = Db::prepareDateForDb($this->dateDue);
 		$record->daysToComplete = $this->daysToComplete;
 		$record->save(false);
 

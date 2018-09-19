@@ -262,7 +262,7 @@ function () {
 
       var layout = document.createElement("input");
       layout.setAttribute("type", "hidden");
-      layout.setAttribute("name", "fieldLayout[" + rowUid + "][]");
+      layout.setAttribute("name", "fieldLayout[][" + rowUid + "][]");
       layout.value = uid;
       field.appendChild(layout); // Create the settings
 
@@ -275,13 +275,7 @@ function () {
       var row = this.getRowTemplate(),
           uid = this.getUid(); // Row UID
 
-      row.setAttribute("data-row-uid", uid); // Row layout input
-
-      var layout = document.createElement("input");
-      layout.setAttribute("type", "hidden");
-      layout.setAttribute("name", "rowLayout[]");
-      layout.value = uid;
-      row.appendChild(layout);
+      row.setAttribute("data-row-uid", uid);
       return form.insertBefore(row, before);
     }
   }, {
@@ -373,8 +367,9 @@ function () {
   }, {
     key: "createFieldSettings",
     value: function createFieldSettings(uiField, type, uid) {
+      var _this2 = this;
+
       var fieldSettings = {
-        handle: "",
         label: "Label",
         instructions: "",
         required: false
@@ -400,47 +395,30 @@ function () {
             default: false
           }];
           break;
-      } // Settings wrapping div
+      }
 
+      this.settingsWrap.appendChild(Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
+        class: "meta hidden",
+        "data-uid": uid
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
+        class: "formski-settings-type"
+      }, this.getFriendlyTypeName(type)), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
+        type: "hidden",
+        name: "fieldSettings[".concat(uid, "][_type]"),
+        value: type
+      })].concat(_toConsumableArray(Object.entries(fieldSettings).map(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            name = _ref2[0],
+            value = _ref2[1];
 
-      var settingsDiv = document.createElement("div");
-      settingsDiv.setAttribute("data-uid", uid);
-      settingsDiv.className = "meta hidden";
-      this.settingsWrap.appendChild(settingsDiv); // Field Type
-
-      var fieldType = document.createElement("div");
-      fieldType.classList.add("formski-settings-type");
-      fieldType.textContent = this.getFriendlyTypeName(type);
-      settingsDiv.appendChild(fieldType); // Field Type input
-
-      var typeInput = document.createElement("input");
-      typeInput.setAttribute("type", "hidden");
-      typeInput.setAttribute("name", "fieldSettings[".concat(uid, "][_type]"));
-      typeInput.value = type;
-      settingsDiv.appendChild(typeInput); // Settings Fields
-
-      var _arr = Object.entries(fieldSettings);
-
-      for (var _i = 0; _i < _arr.length; _i++) {
-        var _arr$_i = _slicedToArray(_arr[_i], 2),
-            name = _arr$_i[0],
-            value = _arr$_i[1];
-
-        var field = this.createSettingsField(uiField, uid, _typeof(value), name, value);
-        settingsDiv.appendChild(field);
-      } // Footer
-
-
-      var footer = document.createElement("footer");
-      footer.className = "footer";
-      settingsDiv.appendChild(footer); // Delete
-
-      var deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Delete";
-      deleteBtn.className = "btn small";
-      deleteBtn.setAttribute("type", "button");
-      deleteBtn.addEventListener("click", this.onDeleteFieldClick.bind(this, uid));
-      footer.appendChild(deleteBtn);
+        return _this2.createSettingsField(uiField, uid, _typeof(value), name, value);
+      })), [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("footer", {
+        class: "footer"
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("button", {
+        class: "btn small",
+        type: "button",
+        click: this.onDeleteFieldClick.bind(this, uid)
+      }, "Delete")])])));
     } // Events
     // =========================================================================
     // Events: Drag / Drop Binders
@@ -540,11 +518,16 @@ function () {
         switch (type) {
           case "boolean":
             {
-              f = Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
+              f = [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
+                type: "hidden",
+                name: inputName,
+                value: "0"
+              }), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
                 type: "checkbox",
                 name: inputName,
+                value: "1",
                 input: onSettingChange
-              });
+              })];
               break;
             }
 

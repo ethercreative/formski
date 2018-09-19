@@ -36,6 +36,17 @@ class Install extends Migration
 		$this->_forms();
 	}
 
+	public function safeDown ()
+	{
+		// Drop Forms Table
+		$this->dropTableIfExists(self::FORMS_TABLE_NAME);
+
+		// Drop form content tables
+		foreach (\Craft::$app->db->schema->tableNames as $tableName)
+			if (strpos($tableName, 'formski_form_') !== false)
+				$this->dropTableIfExists($tableName);
+	}
+
 	// Methods: Private
 	// -------------------------------------------------------------------------
 
@@ -46,10 +57,13 @@ class Install extends Migration
 
 		$this->createTable(self::FORMS_TABLE_NAME, [
 			'id' => $this->primaryKey(),
+			'handle' => $this->char(5)->notNull(),
 
-			'authorId' => $this->integer(),
+			'authorId' => $this->integer()->notNull(),
 
-			'fields'         => $this->json()->null(),
+			'title'          => $this->char(255)->notNull(),
+			'fieldLayout'    => $this->json()->null(),
+			'fieldSettings'  => $this->json()->null(),
 			'dateDue'        => $this->dateTime()->null(),
 			'daysToComplete' => $this->integer()->null(),
 
