@@ -135,10 +135,11 @@ function () {
   // -------------------------------------------------------------------------
   // Constructor
   // =========================================================================
-  function Builder(_ref) {
+  function Builder() {
     var _this = this;
 
-    var fieldLayout = _ref.fieldLayout,
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        fieldLayout = _ref.fieldLayout,
         fieldSettings = _ref.fieldSettings;
 
     _classCallCheck(this, Builder);
@@ -217,55 +218,57 @@ function () {
     var previousRow = this.formWrap.firstElementChild;
     var firstField = null;
 
-    var _arr = Object.entries(fieldLayout);
+    if (fieldLayout && fieldSettings) {
+      var _arr = Object.entries(fieldLayout);
 
-    for (var _i = 0; _i < _arr.length; _i++) {
-      var _arr$_i = _slicedToArray(_arr[_i], 2),
-          rowUid = _arr$_i[0],
-          fields = _arr$_i[1];
+      for (var _i = 0; _i < _arr.length; _i++) {
+        var _arr$_i = _slicedToArray(_arr[_i], 2),
+            rowUid = _arr$_i[0],
+            fields = _arr$_i[1];
 
-      // Create the row
-      var row = this.createRow(this.formWrap, previousRow, rowUid); // Add the new H drop zone
+        // Create the row
+        var row = this.createRow(this.formWrap, previousRow, rowUid); // Add the new H drop zone
 
-      this.formWrap.insertBefore(this.getDropZone("h"), row); // Create the fields
+        this.formWrap.insertBefore(this.getDropZone("h"), row); // Create the fields
 
-      for (var i = 0, l = fields.length; i < l; ++i) {
-        var fieldUid = fields[i];
-        var settings = fieldSettings[fieldUid];
-        var fieldType = settings._type;
-        delete settings._type; // Create the field
+        for (var i = 0, l = fields.length; i < l; ++i) {
+          var fieldUid = fields[i];
+          var settings = fieldSettings[fieldUid];
+          var fieldType = settings._type;
+          delete settings._type; // Create the field
 
-        var field = this.createField(row, fieldType, fieldUid, settings); // If is the first field
+          var field = this.createField(row, fieldType, fieldUid, settings); // If is the first field
 
-        if (i === 0) {
-          // Replace the <!-- Field --> comment w/ the new field
-          row.replaceChild(field, this.getRowFieldComment(row));
-          if (firstField === null) firstField = field;
-        } else {
-          // Add the new field & a new V drop zone
-          row.insertBefore(field, row.lastElementChild);
-          row.insertBefore(this.getDropZone("v"), field);
-        } // Update field UI based of settings
+          if (i === 0) {
+            // Replace the <!-- Field --> comment w/ the new field
+            row.replaceChild(field, this.getRowFieldComment(row));
+            if (firstField === null) firstField = field;
+          } else {
+            // Add the new field & a new V drop zone
+            row.insertBefore(field, row.lastElementChild);
+            row.insertBefore(this.getDropZone("v"), field);
+          } // Update field UI based of settings
 
 
-        var _arr2 = Object.entries(settings);
+          var _arr2 = Object.entries(settings);
 
-        for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
-          var _arr2$_i = _slicedToArray(_arr2[_i2], 2),
-              name = _arr2$_i[0],
-              value = _arr2$_i[1];
+          for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+            var _arr2$_i = _slicedToArray(_arr2[_i2], 2),
+                name = _arr2$_i[0],
+                value = _arr2$_i[1];
 
-          this.onSettingChange(field, name, {
-            target: name === "required" ? {
-              checked: value
-            } : {
-              value: value
-            }
-          });
+            this.onSettingChange(field, name, {
+              target: name === "required" ? {
+                checked: value
+              } : {
+                value: value
+              }
+            });
+          }
         }
-      }
 
-      previousRow = row.nextElementSibling;
+        previousRow = row.nextElementSibling;
+      }
     } // Bind events
 
 
@@ -436,6 +439,7 @@ function () {
       if (fieldSettings === null) {
         fieldSettings = {
           label: "Label",
+          handle: "",
           instructions: "",
           required: false
         };

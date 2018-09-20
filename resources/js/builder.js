@@ -20,7 +20,7 @@ class Builder {
 	// Constructor
 	// =========================================================================
 
-	constructor ({ fieldLayout, fieldSettings }) {
+	constructor ({ fieldLayout, fieldSettings } = {}) {
 		this.fieldsWrap = document.getElementById("formskiFields");
 		this.formWrap = document.getElementById("formskiForm");
 		this.settingsWrap = document.getElementById("field-settings");
@@ -31,52 +31,54 @@ class Builder {
 		let previousRow = this.formWrap.firstElementChild;
 		let firstField = null;
 
-		for (let [rowUid, fields] of Object.entries(fieldLayout)) {
-			// Create the row
-			const row = this.createRow(this.formWrap, previousRow, rowUid);
+		if (fieldLayout && fieldSettings) {
+			for (let [rowUid, fields] of Object.entries(fieldLayout)) {
+				// Create the row
+				const row = this.createRow(this.formWrap, previousRow, rowUid);
 
-			// Add the new H drop zone
-			this.formWrap.insertBefore(this.getDropZone("h"), row);
+				// Add the new H drop zone
+				this.formWrap.insertBefore(this.getDropZone("h"), row);
 
-			// Create the fields
-			for (let i = 0, l = fields.length; i < l; ++i) {
-				const fieldUid = fields[i];
-				const settings = fieldSettings[fieldUid];
-				const fieldType = settings._type;
-				delete settings._type;
+				// Create the fields
+				for (let i = 0, l = fields.length; i < l; ++i) {
+					const fieldUid = fields[i];
+					const settings = fieldSettings[fieldUid];
+					const fieldType = settings._type;
+					delete settings._type;
 
-				// Create the field
-				const field = this.createField(
-					row,
-					fieldType,
-					fieldUid,
-					settings
-				);
-
-				// If is the first field
-				if (i === 0) {
-					// Replace the <!-- Field --> comment w/ the new field
-					row.replaceChild(field, this.getRowFieldComment(row));
-
-					if (firstField === null)
-						firstField = field;
-				} else {
-					// Add the new field & a new V drop zone
-					row.insertBefore(field, row.lastElementChild);
-					row.insertBefore(this.getDropZone("v"), field);
-				}
-
-				// Update field UI based of settings
-				for (let [name, value] of Object.entries(settings)) {
-					this.onSettingChange(
-						field,
-						name,
-						{ target: name === "required" ? { checked: value } : { value } }
+					// Create the field
+					const field = this.createField(
+						row,
+						fieldType,
+						fieldUid,
+						settings
 					);
-				}
-			}
 
-			previousRow = row.nextElementSibling;
+					// If is the first field
+					if (i === 0) {
+						// Replace the <!-- Field --> comment w/ the new field
+						row.replaceChild(field, this.getRowFieldComment(row));
+
+						if (firstField === null)
+							firstField = field;
+					} else {
+						// Add the new field & a new V drop zone
+						row.insertBefore(field, row.lastElementChild);
+						row.insertBefore(this.getDropZone("v"), field);
+					}
+
+					// Update field UI based of settings
+					for (let [name, value] of Object.entries(settings)) {
+						this.onSettingChange(
+							field,
+							name,
+							{ target: name === "required" ? { checked: value } : { value } }
+						);
+					}
+				}
+
+				previousRow = row.nextElementSibling;
+			}
 		}
 
 		// Bind events
@@ -270,6 +272,7 @@ class Builder {
 		if (fieldSettings === null) {
 			fieldSettings = {
 				label: "Label",
+				handle: "",
 				instructions: "",
 				required: false,
 			};

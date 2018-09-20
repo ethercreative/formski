@@ -20,6 +20,8 @@ use yii\db\ActiveQueryInterface;
  * @property int $id
  * @property string $handle
  * @property string $title
+ * @property string $slug
+ * @property string $titleFormat
  * @property int $authorId
  * @property mixed $fieldLayout
  * @property mixed $fieldSettings

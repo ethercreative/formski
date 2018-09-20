@@ -62,6 +62,8 @@ class Install extends Migration
 			'authorId' => $this->integer()->notNull(),
 
 			'title'          => $this->char(255)->notNull(),
+			'slug'           => $this->char(255)->notNull(),
+			'titleFormat'    => $this->string()->notNull(),
 			'fieldLayout'    => $this->json()->null(),
 			'fieldSettings'  => $this->json()->null(),
 			'dateDue'        => $this->dateTime()->null(),

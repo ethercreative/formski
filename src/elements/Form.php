@@ -45,6 +45,9 @@ class Form extends Element
 	/** @var string */
 	public $title;
 
+	/** @var string */
+	public $titleFormat;
+
 	/** @var array */
 	public $fieldLayout;
 
@@ -95,7 +98,7 @@ class Form extends Element
 
 	public static function hasUris (): bool
 	{
-		return false;
+		return true;
 	}
 
 	public static function hasStatuses (): bool
@@ -204,17 +207,18 @@ class Form extends Element
 
 		// TODO: This feels shitty, find a better way to convert JSON to array
 		// on form populate
-		while (!is_array($this->fieldLayout))
+		while (!is_array($this->fieldLayout) && $this->fieldLayout !== null)
 			$this->fieldLayout = Json::decodeIfJson($this->fieldLayout);
 
-		while (!is_array($this->fieldSettings))
+		while (!is_array($this->fieldSettings) && $this->fieldSettings !== null)
 			$this->fieldSettings = Json::decodeIfJson($this->fieldSettings);
 
 		// Convert required to a bool
-		foreach ($this->fieldSettings as $key => $setting)
-			$this->fieldSettings[$key]['required'] = boolval(
-				$this->fieldSettings[$key]['required']
-			);
+		if ($this->fieldSettings !== null)
+			foreach ($this->fieldSettings as $key => $setting)
+				$this->fieldSettings[$key]['required'] = boolval(
+					$this->fieldSettings[$key]['required']
+				);
 	}
 
 	public function extraFields ()
@@ -245,6 +249,7 @@ class Form extends Element
 	{
 		$rules = parent::rules();
 
+		$rules[] = [['title', 'slug', 'titleFormat', 'authorId'], 'required'];
 		$rules[] = [['authorId', 'daysToComplete'], 'number', 'integerOnly' => true];
 		$rules[] = [['dateDue'], DateTimeValidator::class];
 
@@ -298,6 +303,12 @@ class Form extends Element
 	public function getCpEditUrl ()
 	{
 		return UrlHelper::cpUrl('formski/forms/' . $this->id);
+	}
+
+	public function getUriFormat ()
+	{
+		// TODO: Make this configurable
+		return '{slug}';
 	}
 
 	public function setEagerLoadedElements (string $handle, array $elements)
@@ -375,6 +386,8 @@ class Form extends Element
 
 		$record->handle = $this->handle;
 		$record->title = $this->title;
+		$record->slug = $this->slug;
+		$record->titleFormat = $this->titleFormat;
 		$record->authorId = $this->authorId;
 		$record->fieldLayout = $this->fieldLayout;
 		$record->fieldSettings = $this->fieldSettings;

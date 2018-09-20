@@ -57,6 +57,8 @@ class FormQuery extends ElementQuery
 		$this->query->select([
 			'formski_forms.handle',
 			'formski_forms.title',
+			'formski_forms.slug',
+			'formski_forms.titleFormat',
 			'formski_forms.authorId',
 			'formski_forms.fieldLayout',
 			'formski_forms.fieldSettings',

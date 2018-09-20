@@ -102,11 +102,30 @@
 			<div class="meta">
 				{{ forms.textField({
 					label: 'Title',
+					id: 'title',
 					name: 'title',
 					required: true,
 					placeholder: 'My Form',
 					value: form is defined ? form.title,
 					errors: form is defined ? form.getErrors('title')
+				}) }}
+
+				{{ forms.textField({
+					label: 'Slug',
+					id: 'slug',
+					name: 'slug',
+					required: true,
+					placeholder: 'my-form',
+					value: form is defined ? form.slug,
+					errors: form is defined ? form.getErrors('slug')|merge(form.getErrors('uri'))
+				}) }}
+
+				{{ forms.textField({
+					label: 'Title Format <div class="info">'~('Submission titles will be generated based off this format. See [Dynamic Titles](https://docs.craftcms.com/v3/sections-and-entries.html#dynamic-entry-titles) for the formatting.'|md)~'</div>',
+					name: 'titleFormat',
+					required: true,
+					value: form is defined ? form.titleFormat : '{dateCreated|date(\'D, d M Y H:i:s\')}',
+					errors: form is defined ? form.getErrors('titleFormat')
 				}) }}
 
 				{{ forms.elementSelectField({
@@ -118,6 +137,8 @@
 					criteria: [],
 					limit: 1,
 					elements: (form is defined and form.author ? [form.author] : [currentUser]),
+					required: true,
+					errors: form is defined ? form.getErrors('authorId')
 				}) }}
 
 				{{ forms.dateTimeField({
@@ -217,3 +238,9 @@
 		{{ _.formskiLabel(formskiCheckbox) }}
 	</template>
 {% endblock %}
+
+{% if form is not defined or not form.slug %}
+	{%- js -%}
+		window.slugGenerator = new Craft.SlugGenerator('#title', '#slug');
+	{%- endjs -%}
+{% endif %}
