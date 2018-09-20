@@ -135,7 +135,7 @@ function () {
   // -------------------------------------------------------------------------
   // Constructor
   // =========================================================================
-  function Builder() {
+  function Builder(opts) {
     var _this = this;
 
     _classCallCheck(this, Builder);
@@ -206,6 +206,7 @@ function () {
       }
     });
 
+    console.log(opts);
     this.fieldsWrap = document.getElementById("formskiFields");
     this.formWrap = document.getElementById("formskiForm");
     this.settingsWrap = document.getElementById("field-settings");

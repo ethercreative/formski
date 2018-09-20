@@ -105,8 +105,6 @@ class FormService extends Component
 			$transaction = $db->beginTransaction();
 
 			try {
-				// FIXME: Forms aren't being deleted :(
-
 				$tableName = $this->_getFormContentTableName($form);
 				$db->createCommand()->dropTable($tableName)->execute();
 
@@ -124,11 +122,18 @@ class FormService extends Component
 
 				return false;
 			}
+
+			$transaction->commit();
 		}
 
 		return true;
 	}
 
+	/**
+	 * @param $id
+	 *
+	 * @return Form|null
+	 */
 	public function getFormById ($id)
 	{
 		return Form::findOne(['id' => $id]);

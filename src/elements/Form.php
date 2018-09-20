@@ -45,10 +45,10 @@ class Form extends Element
 	/** @var string */
 	public $title;
 
-	/** @var array */
+	/** @var array|string */
 	public $fieldLayout;
 
-	/** @var array */
+	/** @var array|string */
 	public $fieldSettings;
 
 	/** @var int|null */
@@ -232,6 +232,16 @@ class Form extends Element
 		return $rules;
 	}
 
+	public function asJson ()
+	{
+		$form = [];
+
+		$form['fieldLayout'] = $this->fieldLayout;
+		$form['fieldSettings'] = $this->fieldSettings;
+
+		\Craft::dd($form);
+	}
+
 	// Methods: Getters / Setters
 	// -------------------------------------------------------------------------
 
@@ -347,8 +357,8 @@ class Form extends Element
 		$record->handle = $this->handle;
 		$record->title = $this->title;
 		$record->authorId = $this->authorId;
-		$record->fieldLayout = Json::encode($this->fieldLayout);
-		$record->fieldSettings = Json::encode($this->fieldSettings);
+		$record->fieldLayout = $this->fieldLayout;
+		$record->fieldSettings = $this->fieldSettings;
 		$record->dateDue = Db::prepareDateForDb($this->dateDue);
 		$record->daysToComplete = $this->daysToComplete;
 		$record->save(false);

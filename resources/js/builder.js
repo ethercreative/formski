@@ -20,7 +20,9 @@ class Builder {
 	// Constructor
 	// =========================================================================
 
-	constructor () {
+	constructor (opts) {
+		console.log(opts);
+
 		this.fieldsWrap = document.getElementById("formskiFields");
 		this.formWrap = document.getElementById("formskiForm");
 		this.settingsWrap = document.getElementById("field-settings");

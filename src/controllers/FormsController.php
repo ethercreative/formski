@@ -46,6 +46,8 @@ class FormsController extends Controller
 			'userElementType' => User::class,
 		];
 
+		$opts = '';
+
 		if ($formId)
 		{
 			$form = Formski::getInstance()->form->getFormById($formId);
@@ -55,10 +57,15 @@ class FormsController extends Controller
 
 			$variables['form'] = $form;
 			$variables['title'] = $form->title;
+
+			$opts = $form->asJson();
 		}
 
 		$view->registerAssetBundle(FormEditAsset::class);
-		$view->registerJs('new FormskiBuilder();', View::POS_END);
+		$view->registerJs(
+			'new FormskiBuilder(' . $opts . ');',
+			View::POS_END
+		);
 
 		return $this->renderTemplate('formski/forms/_edit', $variables);
 	}
