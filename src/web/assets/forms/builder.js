@@ -135,8 +135,11 @@ function () {
   // -------------------------------------------------------------------------
   // Constructor
   // =========================================================================
-  function Builder(opts) {
+  function Builder(_ref) {
     var _this = this;
+
+    var fieldLayout = _ref.fieldLayout,
+        fieldSettings = _ref.fieldSettings;
 
     _classCallCheck(this, Builder);
 
@@ -206,13 +209,70 @@ function () {
       }
     });
 
-    console.log(opts);
     this.fieldsWrap = document.getElementById("formskiFields");
     this.formWrap = document.getElementById("formskiForm");
     this.settingsWrap = document.getElementById("field-settings");
-    this.initFieldTemplates();
+    this.initFieldTemplates(); // Pre-populate existing fields
+
+    var previousRow = this.formWrap.firstElementChild;
+    var firstField = null;
+
+    var _arr = Object.entries(fieldLayout);
+
+    for (var _i = 0; _i < _arr.length; _i++) {
+      var _arr$_i = _slicedToArray(_arr[_i], 2),
+          rowUid = _arr$_i[0],
+          fields = _arr$_i[1];
+
+      // Create the row
+      var row = this.createRow(this.formWrap, previousRow, rowUid); // Add the new H drop zone
+
+      this.formWrap.insertBefore(this.getDropZone("h"), row); // Create the fields
+
+      for (var i = 0, l = fields.length; i < l; ++i) {
+        var fieldUid = fields[i];
+        var settings = fieldSettings[fieldUid];
+        var fieldType = settings._type;
+        delete settings._type; // Create the field
+
+        var field = this.createField(row, fieldType, fieldUid, settings); // If is the first field
+
+        if (i === 0) {
+          // Replace the <!-- Field --> comment w/ the new field
+          row.replaceChild(field, this.getRowFieldComment(row));
+          if (firstField === null) firstField = field;
+        } else {
+          // Add the new field & a new V drop zone
+          row.insertBefore(field, row.lastElementChild);
+          row.insertBefore(this.getDropZone("v"), field);
+        } // Update field UI based of settings
+
+
+        var _arr2 = Object.entries(settings);
+
+        for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+          var _arr2$_i = _slicedToArray(_arr2[_i2], 2),
+              name = _arr2$_i[0],
+              value = _arr2$_i[1];
+
+          this.onSettingChange(field, name, {
+            target: name === "required" ? {
+              checked: value
+            } : {
+              value: value
+            }
+          });
+        }
+      }
+
+      previousRow = row.nextElementSibling;
+    } // Bind events
+
+
     this.initDragDrop();
-    this.bindClickEvents();
+    this.bindClickEvents(); // Set first field as editing (if one exists)
+
+    if (firstField) this.editField(firstField);
   } // Init
   // =========================================================================
   // Init: Fields
@@ -254,10 +314,11 @@ function () {
   }, {
     key: "createField",
     value: function createField(row, type) {
+      var uid = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.getUid();
+      var settings = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
       // Get the field template & a UID
       var field = this.getFieldTemplate(type),
-          rowUid = row.dataset.rowUid,
-          uid = this.getUid(); // Set the UID data
+          rowUid = row.dataset.rowUid; // Set the UID data
 
       field.setAttribute("data-uid", uid); // Add layout input
 
@@ -267,14 +328,14 @@ function () {
       layout.value = uid;
       field.appendChild(layout); // Create the settings
 
-      this.createFieldSettings(field, type, uid);
+      this.createFieldSettings(field, type, uid, settings);
       return field;
     }
   }, {
     key: "createRow",
     value: function createRow(form, before) {
-      var row = this.getRowTemplate(),
-          uid = this.getUid(); // Row UID
+      var uid = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.getUid();
+      var row = this.getRowTemplate(); // Row UID
 
       row.setAttribute("data-row-uid", uid);
       return form.insertBefore(row, before);
@@ -287,7 +348,7 @@ function () {
       var row = this.createRow(form, before); // Add Field
 
       var field = this.createField(row, type);
-      row.replaceChild(field, row.childNodes[3]); // Add new H drop zone
+      row.replaceChild(field, this.getRowFieldComment(row)); // Add new H drop zone
 
       form.insertBefore(this.getDropZone("h"), row); // Bind new drop zones
 
@@ -370,32 +431,36 @@ function () {
     value: function createFieldSettings(uiField, type, uid) {
       var _this2 = this;
 
-      var fieldSettings = {
-        label: "Label",
-        instructions: "",
-        required: false
-      };
+      var fieldSettings = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
-      switch (type) {
-        case "text":
-          fieldSettings.type = "text";
-          fieldSettings.placeholder = "";
-          break;
+      if (fieldSettings === null) {
+        fieldSettings = {
+          label: "Label",
+          instructions: "",
+          required: false
+        };
 
-        case "textarea":
-          fieldSettings.placeholder = "";
-          fieldSettings.rows = 5;
-          break;
+        switch (type) {
+          case "text":
+            fieldSettings.type = "text";
+            fieldSettings.placeholder = "";
+            break;
 
-        case "dropdown":
-        case "radio":
-        case "checkbox":
-          fieldSettings.options = [{
-            label: "Label",
-            value: "value",
-            default: false
-          }];
-          break;
+          case "textarea":
+            fieldSettings.placeholder = "";
+            fieldSettings.rows = 5;
+            break;
+
+          case "dropdown":
+          case "radio":
+          case "checkbox":
+            fieldSettings.options = [{
+              label: "Label",
+              value: "value",
+              default: false
+            }];
+            break;
+        }
       }
 
       this.settingsWrap.appendChild(Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
@@ -407,10 +472,10 @@ function () {
         type: "hidden",
         name: "fieldSettings[".concat(uid, "][_type]"),
         value: type
-      })].concat(_toConsumableArray(Object.entries(fieldSettings).map(function (_ref) {
-        var _ref2 = _slicedToArray(_ref, 2),
-            name = _ref2[0],
-            value = _ref2[1];
+      })].concat(_toConsumableArray(Object.entries(fieldSettings).map(function (_ref2) {
+        var _ref3 = _slicedToArray(_ref2, 2),
+            name = _ref3[0],
+            value = _ref3[1];
 
         return _this2.createSettingsField(uiField, uid, _typeof(value), name, value);
       })), [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("footer", {
@@ -515,6 +580,7 @@ function () {
         }, "Time"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
           value: "datetime-local"
         }, "Date Time")])]);
+        f.firstElementChild.value = value;
       } else {
         switch (type) {
           case "boolean":
@@ -527,7 +593,8 @@ function () {
                 type: "checkbox",
                 name: inputName,
                 value: "1",
-                input: onSettingChange
+                input: onSettingChange,
+                checked: value
               })];
               break;
             }
@@ -581,6 +648,11 @@ function () {
     key: "capitalize",
     value: function capitalize(str) {
       return str[0].toUpperCase() + str.slice(1);
+    }
+  }, {
+    key: "getRowFieldComment",
+    value: function getRowFieldComment(row) {
+      return row.childNodes[3];
     }
   }]);
 

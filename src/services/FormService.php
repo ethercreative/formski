@@ -85,8 +85,6 @@ class FormService extends Component
 
 			$transaction->rollBack();
 
-			\Craft::dd($e);
-
 			return false;
 		}
 
@@ -119,6 +117,8 @@ class FormService extends Component
 				return false;
 			} catch (\Throwable $e) {
 				$transaction->rollBack();
+
+				\Craft::dd($e);
 
 				return false;
 			}

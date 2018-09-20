@@ -45,10 +45,10 @@ class Form extends Element
 	/** @var string */
 	public $title;
 
-	/** @var array|string */
+	/** @var array */
 	public $fieldLayout;
 
-	/** @var array|string */
+	/** @var array */
 	public $fieldSettings;
 
 	/** @var int|null */
@@ -198,6 +198,25 @@ class Form extends Element
 	// Methods: Public
 	// -------------------------------------------------------------------------
 
+	public function init ()
+	{
+		parent::init();
+
+		// TODO: This feels shitty, find a better way to convert JSON to array
+		// on form populate
+		while (!is_array($this->fieldLayout))
+			$this->fieldLayout = Json::decodeIfJson($this->fieldLayout);
+
+		while (!is_array($this->fieldSettings))
+			$this->fieldSettings = Json::decodeIfJson($this->fieldSettings);
+
+		// Convert required to a bool
+		foreach ($this->fieldSettings as $key => $setting)
+			$this->fieldSettings[$key]['required'] = boolval(
+				$this->fieldSettings[$key]['required']
+			);
+	}
+
 	public function extraFields ()
 	{
 		$names = parent::extraFields();
@@ -239,7 +258,7 @@ class Form extends Element
 		$form['fieldLayout'] = $this->fieldLayout;
 		$form['fieldSettings'] = $this->fieldSettings;
 
-		\Craft::dd($form);
+		return Json::encode($form);
 	}
 
 	// Methods: Getters / Setters

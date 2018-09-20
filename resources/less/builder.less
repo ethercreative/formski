@@ -232,6 +232,12 @@
 			}
 		}
 
+		label {
+			position: relative;
+			display: inline-block;
+			width: 100%;
+		}
+
 		input:not([type=radio]):not([type=checkbox]),
 		textarea,
 		select {
@@ -250,8 +256,8 @@
 			& + span {
 				position: absolute;
 				z-index: 1;
-				right: 20px;
-				bottom: 59px;
+				right: 0;
+				bottom: 38px;
 
 				&:before,
 				&:after {

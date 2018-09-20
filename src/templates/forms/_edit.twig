@@ -136,7 +136,7 @@
 				{{ forms.lightswitchField({
 					label: 'Enabled',
 					name: 'enabled',
-					on: form is defined and form.enabled ?? true,
+					on: form is defined ? form.enabled : true,
 				}) }}
 			</div>
 		</div>
@@ -162,6 +162,7 @@
 		{{ formskiDropZoneV }}
 	</template>
 
+	{# Warning: Update `getRowFieldComment` in `builder.js` if changing children! #}
 	<template id="formskiRow">
 		<div class="formski-form-row">
 			{{ formskiDropZoneV }}
@@ -188,8 +189,10 @@
 
 	<template data-formski-field="dropdown">
 		{% set formskiDropdown %}
-			<select></select>
-			<span></span>
+			<label>
+				<select></select>
+				<span></span>
+			</label>
 		{% endset %}
 		{{ _.formskiLabel(formskiDropdown) }}
 	</template>

@@ -20,16 +20,71 @@ class Builder {
 	// Constructor
 	// =========================================================================
 
-	constructor (opts) {
-		console.log(opts);
-
+	constructor ({ fieldLayout, fieldSettings }) {
 		this.fieldsWrap = document.getElementById("formskiFields");
 		this.formWrap = document.getElementById("formskiForm");
 		this.settingsWrap = document.getElementById("field-settings");
 
 		this.initFieldTemplates();
+
+		// Pre-populate existing fields
+		let previousRow = this.formWrap.firstElementChild;
+		let firstField = null;
+
+		for (let [rowUid, fields] of Object.entries(fieldLayout)) {
+			// Create the row
+			const row = this.createRow(this.formWrap, previousRow, rowUid);
+
+			// Add the new H drop zone
+			this.formWrap.insertBefore(this.getDropZone("h"), row);
+
+			// Create the fields
+			for (let i = 0, l = fields.length; i < l; ++i) {
+				const fieldUid = fields[i];
+				const settings = fieldSettings[fieldUid];
+				const fieldType = settings._type;
+				delete settings._type;
+
+				// Create the field
+				const field = this.createField(
+					row,
+					fieldType,
+					fieldUid,
+					settings
+				);
+
+				// If is the first field
+				if (i === 0) {
+					// Replace the <!-- Field --> comment w/ the new field
+					row.replaceChild(field, this.getRowFieldComment(row));
+
+					if (firstField === null)
+						firstField = field;
+				} else {
+					// Add the new field & a new V drop zone
+					row.insertBefore(field, row.lastElementChild);
+					row.insertBefore(this.getDropZone("v"), field);
+				}
+
+				// Update field UI based of settings
+				for (let [name, value] of Object.entries(settings)) {
+					this.onSettingChange(
+						field,
+						name,
+						{ target: name === "required" ? { checked: value } : { value } }
+					);
+				}
+			}
+
+			previousRow = row.nextElementSibling;
+		}
+
+		// Bind events
 		this.initDragDrop();
 		this.bindClickEvents();
+
+		// Set first field as editing (if one exists)
+		if (firstField) this.editField(firstField);
 	}
 
 	// Init
@@ -75,11 +130,10 @@ class Builder {
 	// Actions: Add Field
 	// -------------------------------------------------------------------------
 
-	createField (row, type) {
+	createField (row, type, uid = this.getUid(), settings = null) {
 		// Get the field template & a UID
 		const field  = this.getFieldTemplate(type)
-			, rowUid = row.dataset.rowUid
-			, uid    = this.getUid();
+			, rowUid = row.dataset.rowUid;
 
 		// Set the UID data
 		field.setAttribute("data-uid", uid);
@@ -92,14 +146,13 @@ class Builder {
 		field.appendChild(layout);
 
 		// Create the settings
-		this.createFieldSettings(field, type, uid);
+		this.createFieldSettings(field, type, uid, settings);
 
 		return field;
 	}
 
-	createRow (form, before) {
-		const row = this.getRowTemplate()
-			, uid = this.getUid();
+	createRow (form, before, uid = this.getUid()) {
+		const row = this.getRowTemplate();
 
 		// Row UID
 		row.setAttribute("data-row-uid", uid);
@@ -115,7 +168,7 @@ class Builder {
 
 		// Add Field
 		const field = this.createField(row, type);
-		row.replaceChild(field, row.childNodes[3]);
+		row.replaceChild(field, this.getRowFieldComment(row));
 
 		// Add new H drop zone
 		form.insertBefore(this.getDropZone("h"), row);
@@ -213,29 +266,31 @@ class Builder {
 	// Actions: Field Settings
 	// -------------------------------------------------------------------------
 
-	createFieldSettings (uiField, type, uid) {
-		const fieldSettings = {
-			label: "Label",
-			instructions: "",
-			required: false,
-		};
+	createFieldSettings (uiField, type, uid, fieldSettings = null) {
+		if (fieldSettings === null) {
+			fieldSettings = {
+				label: "Label",
+				instructions: "",
+				required: false,
+			};
 
-		switch (type) {
-			case "text":
-				fieldSettings.type = "text";
-				fieldSettings.placeholder = "";
-				break;
-			case "textarea":
-				fieldSettings.placeholder = "";
-				fieldSettings.rows = 5;
-				break;
-			case "dropdown":
-			case "radio":
-			case "checkbox":
-				fieldSettings.options = [
-					{ label: "Label", value: "value", default: false },
-				];
-				break;
+			switch (type) {
+				case "text":
+					fieldSettings.type = "text";
+					fieldSettings.placeholder = "";
+					break;
+				case "textarea":
+					fieldSettings.placeholder = "";
+					fieldSettings.rows = 5;
+					break;
+				case "dropdown":
+				case "radio":
+				case "checkbox":
+					fieldSettings.options = [
+						{ label: "Label", value: "value", default: false },
+					];
+					break;
+			}
 		}
 
 		this.settingsWrap.appendChild(h("div", {
@@ -446,6 +501,8 @@ class Builder {
 					h("option", { value: "datetime-local" }, "Date Time"),
 				]),
 			]);
+
+			f.firstElementChild.value = value;
 		} else {
 			switch (type) {
 				case "boolean": {
@@ -460,6 +517,7 @@ class Builder {
 							name: inputName,
 							value: "1",
 							input: onSettingChange,
+							checked: value,
 						}),
 					];
 					break;
@@ -503,6 +561,10 @@ class Builder {
 
 	capitalize (str) {
 		return str[0].toUpperCase() + str.slice(1);
+	}
+
+	getRowFieldComment (row) {
+		return row.childNodes[3];
 	}
 
 }
