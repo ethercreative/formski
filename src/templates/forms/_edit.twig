@@ -106,7 +106,7 @@
 					name: 'title',
 					required: true,
 					placeholder: 'My Form',
-					value: form is defined ? form.title,
+					value: form is defined ? form.title|trim,
 					errors: form is defined ? form.getErrors('title')
 				}) }}
 
@@ -116,7 +116,7 @@
 					name: 'slug',
 					required: true,
 					placeholder: 'my-form',
-					value: form is defined ? form.slug,
+					value: form is defined ? form.slug|trim,
 					errors: form is defined ? form.getErrors('slug')|merge(form.getErrors('uri'))
 				}) }}
 

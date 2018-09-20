@@ -32,8 +32,11 @@ class CreateFormSubmissionTable extends Migration
 		$this->createTable($this->tableName, [
 			'id' => $this->primaryKey(),
 			'elementId'   => $this->integer()->notNull(),
+			'formId'      => $this->integer()->notNull(),
 
 			'title'       => $this->string(),
+			'ipAddress'   => $this->string(),
+			'userAgent'   => $this->string(),
 
 			'dateCreated' => $this->dateTime()->notNull(),
 			'dateUpdated' => $this->dateTime()->notNull(),
@@ -47,11 +50,28 @@ class CreateFormSubmissionTable extends Migration
 			true
 		);
 
+		$this->createIndex(
+			$this->db->getIndexName($this->tableName, 'formId'),
+			$this->tableName,
+			'formId',
+			true
+		);
+
 		$this->addForeignKey(
 			$this->db->getForeignKeyName($this->tableName, 'elementId'),
 			$this->tableName,
 			'elementId',
 			'{{%elements}}',
+			'id',
+			'CASCADE',
+			null
+		);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName($this->tableName, 'formId'),
+			$this->tableName,
+			'formId',
+			Install::FORMS_TABLE_NAME,
 			'id',
 			'CASCADE',
 			null

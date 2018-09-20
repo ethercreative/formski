@@ -9,9 +9,14 @@
 namespace ether\formski;
 
 use craft\base\Plugin;
+use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
+use craft\services\Elements;
+use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
+use ether\formski\elements\Form;
 use ether\formski\services\FormService;
+use ether\formski\web\twig\CraftVariableBehavior;
 use yii\base\Event;
 
 /**
@@ -61,6 +66,18 @@ class Formski extends Plugin
 			UrlManager::EVENT_REGISTER_CP_URL_RULES,
 			[$this, 'onRegisterCpUrlRules']
 		);
+
+		Event::on(
+			CraftVariable::class,
+			CraftVariable::EVENT_INIT,
+			[$this, 'onVariableInit']
+		);
+
+		Event::on(
+			Elements::class,
+			Elements::EVENT_REGISTER_ELEMENT_TYPES,
+			[$this, 'onRegisterElementTypes']
+		);
 	}
 
 	// Events
@@ -71,6 +88,21 @@ class Formski extends Plugin
 		$event->rules['formski/forms'] = 'formski/forms';
 		$event->rules['formski/forms/new'] = 'formski/forms/edit';
 		$event->rules['formski/forms/<formId:\d+>'] = 'formski/forms/edit';
+	}
+
+	public function onVariableInit (Event $event)
+	{
+		/** @var CraftVariable $variable */
+		$variable = $event->sender;
+		$variable->attachBehavior(
+			'bookings',
+			CraftVariableBehavior::class
+		);
+	}
+
+	public function onRegisterElementTypes (RegisterComponentTypesEvent $event)
+	{
+		$event->types[] = Form::class;
 	}
 
 	// Getters

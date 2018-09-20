@@ -266,6 +266,33 @@ class Form extends Element
 		return Json::encode($form);
 	}
 
+	// Methods: Routing
+	// -------------------------------------------------------------------------
+
+	public function getUriFormat ()
+	{
+		// TODO: Make this configurable
+		return '{slug}';
+	}
+
+	protected function route ()
+	{
+		if (!$this->enabled || $this->getStatus() !== self::STATUS_ENABLED)
+			return null;
+
+		// TODO: Make configurable
+
+		return [
+			'templates/render',
+			[
+				'template'  => '_form',
+				'variables' => [
+					'form' => $this,
+				]
+			]
+		];
+	}
+
 	// Methods: Getters / Setters
 	// -------------------------------------------------------------------------
 
@@ -303,12 +330,6 @@ class Form extends Element
 	public function getCpEditUrl ()
 	{
 		return UrlHelper::cpUrl('formski/forms/' . $this->id);
-	}
-
-	public function getUriFormat ()
-	{
-		// TODO: Make this configurable
-		return '{slug}';
 	}
 
 	public function setEagerLoadedElements (string $handle, array $elements)

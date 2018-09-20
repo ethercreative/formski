@@ -25,6 +25,19 @@ use yii\web\NotFoundHttpException;
 class FormsController extends Controller
 {
 
+	protected $allowAnonymous = ['send'];
+
+	// Public
+	// =========================================================================
+
+	public function actionSend ()
+	{
+		\Craft::dd($_POST);
+	}
+
+	// Internal
+	// =========================================================================
+
 	public function actionIndex ()
 	{
 		return $this->renderTemplate('formski/forms');
@@ -82,7 +95,7 @@ class FormsController extends Controller
 
 		// Get existing form (if ID was sent)
 		if (($id = $request->getBodyParam('id'))) {
-			$form = Form::findOne(['id' => $id]);
+			$form = Formski::getInstance()->form->getFormById($id);
 
 			if (!$form)
 				throw new NotFoundHttpException('Unable to find form with ID: ' . $id);
@@ -93,6 +106,8 @@ class FormsController extends Controller
 
 		// Get fields
 		$form->title = $request->getRequiredBodyParam('title');
+		$form->slug = $request->getRequiredBodyParam('slug');
+		$form->titleFormat = $request->getRequiredBodyParam('titleFormat');
 		$form->authorId = $request->getRequiredBodyParam('author')[0];
 		$form->dateDue = $request->getBodyParam('dateDue');
 		$form->daysToComplete = $request->getBodyParam('daysToComplete');

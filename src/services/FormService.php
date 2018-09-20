@@ -34,7 +34,7 @@ class FormService extends Component
 		try {
 			$db = \Craft::$app->db;
 
-			$tableName = $this->_getFormContentTableName($form);
+			$tableName = $this->getContentTableName($form);
 
 			// Create the table if it doesn't exist
 			if (!$db->tableExists($tableName))
@@ -103,7 +103,7 @@ class FormService extends Component
 			$transaction = $db->beginTransaction();
 
 			try {
-				$tableName = $this->_getFormContentTableName($form);
+				$tableName = $this->getContentTableName($form);
 				$db->createCommand()->dropTable($tableName)->execute();
 
 				if (!\Craft::$app->elements->deleteElement($form)) {
@@ -136,13 +136,17 @@ class FormService extends Component
 	 */
 	public function getFormById ($id)
 	{
-		return Form::findOne(['id' => $id]);
+		$query = Form::find();
+		$query->id = $id;
+		$query->anyStatus();
+
+		return $query->one();
 	}
 
 	// Helpers
 	// =========================================================================
 
-	private function _getFormContentTableName (Form $form)
+	public function getContentTableName (Form $form)
 	{
 		return '{{%formski_form_' . $form->handle . '}}';
 	}
