@@ -9,7 +9,9 @@
 namespace ether\formski\services;
 
 use craft\base\Component;
+use ether\formski\elements\db\SubmissionQuery;
 use ether\formski\elements\Form;
+use ether\formski\elements\Submission;
 use ether\formski\migrations\CreateFormSubmissionTable;
 use ether\formski\migrations\UpdateSubmissionTableColumns;
 
@@ -103,12 +105,21 @@ class FormService extends Component
 			$transaction = $db->beginTransaction();
 
 			try {
+				// Delete submissions
+				/** @var SubmissionQuery $submissions */
+				$submissions = Submission::find();
+				$submissions->form = $form;
+				$submissions = $submissions->ids();
+				foreach ($submissions as $id)
+					\Craft::$app->elements->deleteElementById($id);
+
+				// Delete table
 				$tableName = $this->getContentTableName($form);
 				$db->createCommand()->dropTable($tableName)->execute();
 
+				// Delete form element
 				if (!\Craft::$app->elements->deleteElement($form)) {
 					$transaction->rollBack();
-
 					return false;
 				}
 			} catch (\Exception $e) {

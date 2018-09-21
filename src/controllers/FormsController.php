@@ -57,10 +57,12 @@ class FormsController extends Controller
 		$submission->ipAddress = $request->userIP;
 		$submission->userAgent = $request->userAgent;
 		$submission->title = Formski::getInstance()->submission->renderTitle($submission);
-		$submission->userId = null;
 
-		if (\Craft::$app->user->id)
+		if (\Craft::$app->user->isGuest) {
+			$submission->userId = null;
+		} else {
 			$submission->userId = \Craft::$app->user->id;
+		}
 
 		if (!\Craft::$app->elements->saveElement($submission))
 		{

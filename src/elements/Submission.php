@@ -72,6 +72,12 @@ class Submission extends Element
 			return null;
 		}
 
+		if ($this->form && array_key_exists($name, $this->form->fieldSettings))
+		{
+			$this->fields[$name] = $value;
+			return null;
+		}
+
 		return parent::__set($name, $value);
 	}
 
@@ -81,7 +87,23 @@ class Submission extends Element
 		if (strncmp($name, 'field_', 6) === 0)
 			return $this->fields[substr($name, 6)];
 
+		if (array_key_exists($name, $this->fields))
+			return $this->fields[$name];
+
 		return parent::__get($name);
+	}
+
+	public function offsetExists ($offset)
+	{
+		return parent::offsetExists($offset) || array_key_exists($offset, $this->fields);
+	}
+
+	public function offsetGet ($offset)
+	{
+		if (array_key_exists($offset, $this->fields))
+			return $this->fields[$offset];
+
+		return parent::offsetGet($offset);
 	}
 
 	// Methods: Static
@@ -251,6 +273,7 @@ class Submission extends Element
 		$content = [
 			'title' => $this->title,
 			'formId' => $this->formId,
+			'userId' => $this->userId,
 			'ipAddress' => $this->ipAddress,
 			'userAgent' => $this->userAgent,
 		];

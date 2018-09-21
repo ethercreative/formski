@@ -45,7 +45,7 @@
 
 	{% for uid, settings in submission.form.fieldSettings %}
 		{% set value %}
-			<p>{{ submission.fields[uid] }}</p>
+			<p>{{ submission[uid] }}</p>
 		{% endset %}
 		{{ forms.field({
 			label: settings['label']
