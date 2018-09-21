@@ -83,7 +83,7 @@ class SubmissionQuery extends ElementQuery
 		{
 			$this->subQuery->andWhere(
 				Db::parseParam(
-					'formski_forms.userId',
+					$tableName . '.userId',
 					$this->userId
 				)
 			);
