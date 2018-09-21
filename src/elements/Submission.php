@@ -191,6 +191,10 @@ class Submission extends Element
 
 		$rules[] = [['formId'], 'required'];
 
+		foreach ($this->form->fieldSettings as $uid => $settings)
+			if ($settings['required'])
+				$rules[] = [[$uid], 'required'];
+
 		return $rules;
 	}
 
