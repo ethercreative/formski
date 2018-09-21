@@ -11,6 +11,7 @@ namespace ether\formski\elements;
 use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
+use craft\elements\User;
 use craft\helpers\UrlHelper;
 use ether\formski\elements\db\SubmissionQuery;
 use ether\formski\Formski;
@@ -38,6 +39,9 @@ class Submission extends Element
 	/** @var int */
 	public $formId;
 
+	/** @var int|null */
+	public $userId;
+
 	/** @var string */
 	public $ipAddress;
 
@@ -53,6 +57,9 @@ class Submission extends Element
 	/** @var Form */
 	private $_form;
 
+	/** @var User|null */
+	private $_user;
+
 	// Methods
 	// =========================================================================
 
@@ -61,11 +68,20 @@ class Submission extends Element
 		// Is this the "field_handle" syntax?
 		if (strncmp($name, 'field_', 6) === 0)
 		{
-			$this->fields[$name] = $value;
-			return;
+			$this->fields[substr($name, 6)] = $value;
+			return null;
 		}
 
 		return parent::__set($name, $value);
+	}
+
+	public function __get ($name)
+	{
+		// Is this the "field_handle" syntax?
+		if (strncmp($name, 'field_', 6) === 0)
+			return $this->fields[substr($name, 6)];
+
+		return parent::__get($name);
 	}
 
 	// Methods: Static
@@ -128,7 +144,8 @@ class Submission extends Element
 	protected static function defineTableAttributes (): array
 	{
 		return [
-			'title' => ['label' => \Craft::t('app', 'Title')],
+			'title'       => ['label' => \Craft::t('app', 'Title')],
+			'user'        => ['label' => \Craft::t('app', 'User')],
 			'dateCreated' => ['label' => \Craft::t('app', 'Date Created')],
 			'dateUpdated' => ['label' => \Craft::t('app', 'Date Updated')],
 		];
@@ -175,8 +192,40 @@ class Submission extends Element
 		return $labels;
 	}
 
+	protected function tableAttributeHtml (string $attribute): string
+	{
+		if ($attribute === 'user')
+		{
+			$user = $this->getUser();
+
+			return $user
+				? \Craft::$app->view->renderTemplate(
+					'_elements/element',
+					['element' => $user]
+				) : '';
+		}
+
+		return parent::tableAttributeHtml($attribute);
+	}
+
 	// Methods: Getters / Setters
 	// -------------------------------------------------------------------------
+
+	public function getUser ()
+	{
+		if ($this->_user)
+			return $this->_user;
+
+		if ($this->userId === null)
+			return null;
+
+		return $this->_user = \Craft::$app->users->getUserById($this->userId);
+	}
+
+	public function setUser (User $user = null)
+	{
+		$this->_user = $user;
+	}
 
 	public function getForm ()
 	{

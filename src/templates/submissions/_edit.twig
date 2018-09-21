@@ -1,5 +1,5 @@
 {% extends '_layouts/cp' %}
-{% set selectedSubnavItem = 'forms' %}
+{% set selectedSubnavItem = 'submissions' %}
 {% import '_includes/forms' as forms %}
 
 {% set crumbs = [
@@ -8,6 +8,17 @@
 
 {% block details %}
 	<div class="meta read-only">
+		<div class="data">
+			<h5 class="heading">User</h5>
+			<div class="value">
+				{% if submission.user %}
+					<a href="{{ submission.user.cpEditUrl }}">{{ submission.user }}</a>
+				{% else %}
+					Guest
+				{% endif %}
+			</div>
+		</div>
+
 		<div class="data">
 			<h5 class="heading">IP Address</h5>
 			<div class="value">{{ submission.ipAddress }}</div>
@@ -34,7 +45,7 @@
 
 	{% for uid, settings in submission.form.fieldSettings %}
 		{% set value %}
-			<p>{{ submission.fields['field_' ~ uid] }}</p>
+			<p>{{ submission.fields[uid] }}</p>
 		{% endset %}
 		{{ forms.field({
 			label: settings['label']

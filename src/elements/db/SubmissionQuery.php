@@ -9,6 +9,7 @@
 namespace ether\formski\elements\db;
 
 use craft\elements\db\ElementQuery;
+use craft\helpers\Db;
 use ether\formski\elements\Form;
 use ether\formski\Formski;
 use yii\base\InvalidConfigException;
@@ -31,18 +32,32 @@ class SubmissionQuery extends ElementQuery
 	/** @var int */
 	public $formId;
 
+	/** @var int */
+	public $userId;
+
 	// Methods
 	// =========================================================================
 
 	// Methods: Public
 	// -------------------------------------------------------------------------
 
+	public function form ($value)
+	{
+		$this->form = $value;
+
+		return $this;
+	}
+
 	public function formId ($value)
 	{
-		if ($value instanceof Form)
-			$this->form = $value;
-		else
-			$this->form = Formski::getInstance()->form->getFormById($value);
+		$this->form = Formski::getInstance()->form->getFormById($value);
+
+		return $this;
+	}
+
+	public function userId ($value)
+	{
+		$this->userId = $value;
 
 		return $this;
 	}
@@ -63,6 +78,16 @@ class SubmissionQuery extends ElementQuery
 		$this->joinElementTable($tableName);
 
 		$this->query->select($tableName . '.*');
+
+		if ($this->userId)
+		{
+			$this->subQuery->andWhere(
+				Db::parseParam(
+					'formski_forms.userId',
+					$this->userId
+				)
+			);
+		}
 
 		return parent::beforePrepare();
 	}

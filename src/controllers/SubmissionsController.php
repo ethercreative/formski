@@ -8,6 +8,7 @@
 
 namespace ether\formski\controllers;
 
+use craft\elements\User;
 use craft\web\Controller;
 use ether\formski\Formski;
 use yii\web\NotFoundHttpException;
@@ -33,6 +34,7 @@ class SubmissionsController extends Controller
 
 		$variables = [
 			'title' => $submission->title,
+			'userElementType' => User::class,
 			'submission' => $submission,
 		];
 

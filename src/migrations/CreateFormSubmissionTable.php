@@ -32,6 +32,7 @@ class CreateFormSubmissionTable extends Migration
 		$this->createTable($this->tableName, [
 			'id' => $this->primaryKey(),
 			'formId'      => $this->integer()->notNull(),
+			'userId'      => $this->integer()->null(),
 
 			'title'       => $this->string(),
 			'ipAddress'   => $this->string(),
@@ -54,6 +55,16 @@ class CreateFormSubmissionTable extends Migration
 			$this->tableName,
 			'id',
 			'{{%elements}}',
+			'id',
+			'CASCADE',
+			null
+		);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName($this->tableName, 'userId'),
+			$this->tableName,
+			'userId',
+			'{{%users}}',
 			'id',
 			'CASCADE',
 			null
