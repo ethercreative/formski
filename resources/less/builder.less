@@ -212,6 +212,15 @@
 			font-weight: 500;
 			letter-spacing: 0;
 
+			h1& {
+				margin-bottom: 0;
+
+				color: #576575;
+				font-size: 20px;
+				font-weight: 500;
+				letter-spacing: 0;
+			}
+
 			&.required:after {
 				margin: -7px 0 0 2px !important;
 			}
@@ -230,6 +239,12 @@
 			& + * {
 				margin-top: 7px;
 			}
+		}
+
+		&-md {
+			ul, ol { margin-left: 24px !important }
+			ul { list-style: disc }
+			ol { list-style: decimal }
 		}
 
 		label {
@@ -281,6 +296,17 @@
 					border-top: 6px solid #313A48;
 					border-bottom: none;
 				}
+			}
+		}
+
+		p {
+			color: #9CA6B5;
+			font-size: 14px;
+			letter-spacing: 0;
+			line-height: 24px;
+
+			&:last-of-type {
+				margin-bottom: 0;
 			}
 		}
 	}

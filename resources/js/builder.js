@@ -1,4 +1,5 @@
 import h from "./helpers/h";
+import showdown from "showdown";
 
 class Builder {
 
@@ -10,6 +11,8 @@ class Builder {
 
 	static _uidChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	static _uidCharsLength = Builder._uidChars.length;
+
+	static md = new showdown.Converter();
 
 	// Properties: Instance
 	// -------------------------------------------------------------------------
@@ -273,9 +276,12 @@ class Builder {
 			fieldSettings = {
 				label: "Label",
 				handle: "",
-				instructions: "",
-				required: false,
 			};
+
+			if (type !== "heading" && type !== "description") {
+				fieldSettings.instructions = "";
+				fieldSettings.required = false;
+			}
 
 			switch (type) {
 				case "text":
@@ -292,6 +298,13 @@ class Builder {
 					fieldSettings.options = [
 						{ label: "Label", value: "value", default: false },
 					];
+					break;
+				case "acceptance":
+					fieldSettings.required = true;
+					break;
+				case "description":
+					delete fieldSettings.label;
+					fieldSettings.description = "Enter your description";
 					break;
 			}
 		}
@@ -448,6 +461,10 @@ class Builder {
 				field.querySelector(".formski-field-label")
 					 .classList[e.target.checked ? "add" : "remove"]("required");
 				break;
+			case "description": {
+				field.innerHTML = Builder.md.makeHtml(value);
+				break;
+			}
 		}
 	};
 
@@ -506,6 +523,17 @@ class Builder {
 			]);
 
 			f.firstElementChild.value = value;
+		} else if (name === "description") {
+			f = h("textarea", {
+				class: "text fullwidth",
+				name: inputName,
+				value,
+				input: (e) => {
+					e.target.style.height = "";
+					e.target.style.height = e.target.scrollHeight + "px";
+					onSettingChange(e);
+				}
+			});
 		} else {
 			switch (type) {
 				case "boolean": {
@@ -567,7 +595,11 @@ class Builder {
 	}
 
 	getRowFieldComment (row) {
-		return row.childNodes[3];
+		for (let i = 0, l = row.childNodes.length; i < l; ++i)
+			if (row.childNodes[i].nodeName === "#comment")
+				return row.childNodes[i];
+
+		return null;
 	}
 
 }

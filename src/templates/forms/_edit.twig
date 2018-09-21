@@ -6,13 +6,15 @@
 	{ label: 'Forms'|t('formski'), url: url('formski/forms') }
 ] %}
 
-{% macro formskiLabel (children) %}
+{% macro formskiLabel (children, noInstr = false) %}
 	<div class="formski-field">
 		<div class="formski-field-label">
 			Label
 		</div>
 
-		<div class="formski-field-instructions"></div>
+		{% if not noInstr %}
+			<div class="formski-field-instructions"></div>
+		{% endif %}
 
 		{{ children }}
 	</div>
@@ -184,7 +186,6 @@
 		{{ formskiDropZoneV }}
 	</template>
 
-	{# Warning: Update `getRowFieldComment` in `builder.js` if changing children! #}
 	<template id="formskiRow">
 		<div class="formski-form-row">
 			{{ formskiDropZoneV }}
@@ -237,6 +238,30 @@
 			</label>
 		{% endset %}
 		{{ _.formskiLabel(formskiCheckbox) }}
+	</template>
+
+	<template data-formski-field="acceptance">
+		{% set formskiCheckbox %}
+			<label>
+				✅
+				<span class="formski-field-instructions" style="display:inline"></span>
+			</label>
+		{% endset %}
+		{{ _.formskiLabel(formskiCheckbox, true) }}
+	</template>
+
+	<template data-formski-field="heading">
+		<div class="formski-field">
+			<h1 class="formski-field-label">
+				Label
+			</h1>
+		</div>
+	</template>
+
+	<template data-formski-field="description">
+		<div class="formski-field formski-field-md">
+			<p>Enter your description</p>
+		</div>
 	</template>
 {% endblock %}
 
