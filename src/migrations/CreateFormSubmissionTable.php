@@ -31,7 +31,6 @@ class CreateFormSubmissionTable extends Migration
 	{
 		$this->createTable($this->tableName, [
 			'id' => $this->primaryKey(),
-			'elementId'   => $this->integer()->notNull(),
 			'formId'      => $this->integer()->notNull(),
 
 			'title'       => $this->string(),
@@ -44,23 +43,16 @@ class CreateFormSubmissionTable extends Migration
 		]);
 
 		$this->createIndex(
-			$this->db->getIndexName($this->tableName, 'elementId'),
-			$this->tableName,
-			'elementId',
-			true
-		);
-
-		$this->createIndex(
 			$this->db->getIndexName($this->tableName, 'formId'),
 			$this->tableName,
 			'formId',
-			true
+			false
 		);
 
 		$this->addForeignKey(
-			$this->db->getForeignKeyName($this->tableName, 'elementId'),
+			$this->db->getForeignKeyName($this->tableName, 'id'),
 			$this->tableName,
-			'elementId',
+			'id',
 			'{{%elements}}',
 			'id',
 			'CASCADE',

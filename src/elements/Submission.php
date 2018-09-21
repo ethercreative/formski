@@ -11,9 +11,9 @@ namespace ether\formski\elements;
 use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
+use craft\helpers\UrlHelper;
 use ether\formski\elements\db\SubmissionQuery;
 use ether\formski\Formski;
-use ether\formski\migrations\Install;
 
 /**
  * Class Submission
@@ -44,6 +44,9 @@ class Submission extends Element
 	/** @var string */
 	public $userAgent;
 
+	/** @var array */
+	public $fields;
+
 	// Properties: Private
 	// -------------------------------------------------------------------------
 
@@ -52,6 +55,18 @@ class Submission extends Element
 
 	// Methods
 	// =========================================================================
+
+	public function __set ($name, $value)
+	{
+		// Is this the "field_handle" syntax?
+		if (strncmp($name, 'field_', 6) === 0)
+		{
+			$this->fields[$name] = $value;
+			return;
+		}
+
+		return parent::__set($name, $value);
+	}
 
 	// Methods: Static
 	// -------------------------------------------------------------------------
@@ -91,13 +106,6 @@ class Submission extends Element
 
 	protected static function defineSources (string $context = null): array
 	{
-		$sources = [
-			[
-				'key' => '*',
-				'label' => \Craft::t('formski', 'All Submissions'),
-			],
-		];
-
 		$sources[] = [
 			'heading' => \Craft::t('formski', 'Forms'),
 		];
@@ -115,6 +123,15 @@ class Submission extends Element
 		}
 
 		return $sources;
+	}
+
+	protected static function defineTableAttributes (): array
+	{
+		return [
+			'title' => ['label' => \Craft::t('app', 'Title')],
+			'dateCreated' => ['label' => \Craft::t('app', 'Date Created')],
+			'dateUpdated' => ['label' => \Craft::t('app', 'Date Updated')],
+		];
 	}
 
 	protected static function defineSearchableAttributes (): array
@@ -169,14 +186,9 @@ class Submission extends Element
 		return $this->_form = Formski::getInstance()->form->getFormById($this->formId);
 	}
 
-	public function getContentTable (): string
+	public function getCpEditUrl ()
 	{
-		return Formski::getInstance()->form->getContentTableName($this->form);
-	}
-
-	public function getFieldColumnPrefix (): string
-	{
-		return 'field_';
+		return UrlHelper::cpUrl('formski/submissions/' . $this->formId . '-' . $this->id);
 	}
 
 	// Methods: Events
@@ -185,7 +197,7 @@ class Submission extends Element
 	public function afterSave (bool $isNew)
 	{
 		$db = \Craft::$app->db;
-		$tableName = Install::SUBMISSIONS_TABLE_NAME;
+		$tableName = $this->form->getTableName();
 
 		$content = [
 			'title' => $this->title,
@@ -194,8 +206,8 @@ class Submission extends Element
 			'userAgent' => $this->userAgent,
 		];
 
-		foreach ($this->form->fieldSettings as $uid => $field)
-			$content[$uid] = $this->{$uid};
+		foreach ($this->fields as $uid => $value)
+			$content['field_' . $uid] = $value;
 
 		if ($isNew)
 		{

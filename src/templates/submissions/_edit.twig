@@ -1,0 +1,44 @@
+{% extends '_layouts/cp' %}
+{% set selectedSubnavItem = 'forms' %}
+{% import '_includes/forms' as forms %}
+
+{% set crumbs = [
+	{ label: 'Submissions'|t('formski'), url: url('formski/submissions') }
+] %}
+
+{% block details %}
+	<div class="meta read-only">
+		<div class="data">
+			<h5 class="heading">IP Address</h5>
+			<div class="value">{{ submission.ipAddress }}</div>
+		</div>
+
+		<div class="data">
+			<h5 class="heading">User Agent</h5>
+			<div class="value">{{ submission.userAgent }}</div>
+		</div>
+
+		<div class="data">
+			<h5 class="heading">Date Submitted</h5>
+			<div class="value">{{ submission.dateCreated|datetime('short') }}</div>
+		</div>
+
+		<div class="data">
+			<h5 class="heading">Date Updated</h5>
+			<div class="value">{{ submission.dateUpdated|datetime('short') }}</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block content %}
+
+	{% for uid, settings in submission.form.fieldSettings %}
+		{% set value %}
+			<p>{{ submission.fields['field_' ~ uid] }}</p>
+		{% endset %}
+		{{ forms.field({
+			label: settings['label']
+		}, value) }}
+	{% endfor %}
+
+{% endblock %}

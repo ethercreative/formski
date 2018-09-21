@@ -146,8 +146,11 @@ class FormService extends Component
 	// Helpers
 	// =========================================================================
 
-	public function getContentTableName (Form $form)
+	public function getContentTableName (Form $form, $nameOnly = false)
 	{
+		if ($nameOnly)
+			return 'formski_form_' . $form->handle;
+
 		return '{{%formski_form_' . $form->handle . '}}';
 	}
 

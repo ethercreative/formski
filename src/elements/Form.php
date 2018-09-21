@@ -20,6 +20,7 @@ use craft\helpers\UrlHelper;
 use craft\validators\DateTimeValidator;
 use ether\formski\elements\actions\Delete;
 use ether\formski\elements\db\FormQuery;
+use ether\formski\Formski;
 use ether\formski\migrations\Install;
 use ether\formski\records\FormRecord;
 use yii\base\InvalidConfigException;
@@ -339,6 +340,11 @@ class Form extends Element
 		} else {
 			parent::setEagerLoadedElements($handle, $elements);
 		}
+	}
+
+	public function getTableName ($nameOnly = false)
+	{
+		return Formski::getInstance()->form->getContentTableName($this, $nameOnly);
 	}
 
 	// Methods: Indexes, etc.

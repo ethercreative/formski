@@ -15,7 +15,9 @@ use craft\services\Elements;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use ether\formski\elements\Form;
+use ether\formski\elements\Submission;
 use ether\formski\services\FormService;
+use ether\formski\services\SubmissionService;
 use ether\formski\web\twig\CraftVariableBehavior;
 use yii\base\Event;
 
@@ -23,6 +25,7 @@ use yii\base\Event;
  * Class Formski
  *
  * @property FormService $form
+ * @property SubmissionService $submission
  *
  * @author  Ether Creative
  * @package ether\formski
@@ -56,6 +59,7 @@ class Formski extends Plugin
 
 		$this->setComponents([
 			'form' => FormService::class,
+			'submission' => SubmissionService::class,
 		]);
 
 		// Events
@@ -85,6 +89,8 @@ class Formski extends Plugin
 
 	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
 	{
+		$event->rules['formski/submissions/<formId:\d+>-<submissionId\d+>'] = 'formski/submissions/edit';
+
 		$event->rules['formski/forms'] = 'formski/forms';
 		$event->rules['formski/forms/new'] = 'formski/forms/edit';
 		$event->rules['formski/forms/<formId:\d+>'] = 'formski/forms/edit';
@@ -103,6 +109,7 @@ class Formski extends Plugin
 	public function onRegisterElementTypes (RegisterComponentTypesEvent $event)
 	{
 		$event->types[] = Form::class;
+		$event->types[] = Submission::class;
 	}
 
 	// Getters

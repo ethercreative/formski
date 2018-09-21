@@ -12,6 +12,7 @@ use craft\elements\User;
 use craft\web\Controller;
 use craft\web\View;
 use ether\formski\elements\Form;
+use ether\formski\elements\Submission;
 use ether\formski\Formski;
 use ether\formski\web\assets\forms\FormEditAsset;
 use yii\web\NotFoundHttpException;
@@ -30,6 +31,13 @@ class FormsController extends Controller
 	// Public
 	// =========================================================================
 
+	/**
+	 * @return null|\yii\web\Response
+	 * @throws \Throwable
+	 * @throws \craft\errors\ElementNotFoundException
+	 * @throws \yii\base\Exception
+	 * @throws \yii\web\BadRequestHttpException
+	 */
 	public function actionSend ()
 	{
 		$this->requirePostRequest();
@@ -38,7 +46,36 @@ class FormsController extends Controller
 		$formId = $request->getRequiredBodyParam('formId');
 		$fields = $request->getRequiredBodyParam('fields');
 
-		\Craft::dd(compact('formId', 'fields'));
+		$submission = new Submission();
+
+		$submission->formId = $formId;
+		$submission->fields = [];
+
+		foreach ($fields as $uid => $value)
+			$submission->fields[$uid] = $value;
+
+		$submission->ipAddress = $request->userIP;
+		$submission->userAgent = $request->userAgent;
+		$submission->title = Formski::getInstance()->submission->renderTitle($submission);
+
+		if (!\Craft::$app->elements->saveElement($submission))
+		{
+			\Craft::$app->session->setError(
+				\Craft::t('formski', 'Unable to save submission!')
+			);
+
+			\Craft::$app->urlManager->setRouteParams([
+				'submission' => $submission,
+			]);
+
+			return null;
+		}
+
+		\Craft::$app->session->setNotice(
+			\Craft::t('formski', 'Submission saved!')
+		);
+
+		return $this->redirectToPostedUrl($submission);
 	}
 
 	// Internal

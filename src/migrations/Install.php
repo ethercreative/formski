@@ -23,7 +23,6 @@ class Install extends Migration
 	// =========================================================================
 
 	const FORMS_TABLE_NAME = '{{%formski_forms}}';
-	const SUBMISSIONS_TABLE_NAME = '{{%formski_submissions}}';
 
 	// Methods
 	// =========================================================================
@@ -34,21 +33,17 @@ class Install extends Migration
 	public function safeUp ()
 	{
 		$this->_forms();
-		$this->_submissions();
 	}
 
 	public function safeDown ()
 	{
-		// Drop Forms Table
-		$this->dropTableIfExists(self::FORMS_TABLE_NAME);
-
-		// Drop Submissions Table
-		$this->dropTableIfExists(self::SUBMISSIONS_TABLE_NAME);
-
 		// Drop form content tables
 		foreach (\Craft::$app->db->schema->tableNames as $tableName)
 			if (strpos($tableName, 'formski_form_') !== false)
 				$this->dropTableIfExists($tableName);
+
+		// Drop Forms Table
+		$this->dropTableIfExists(self::FORMS_TABLE_NAME);
 	}
 
 	// Methods: Private
@@ -83,45 +78,6 @@ class Install extends Migration
 			self::FORMS_TABLE_NAME,
 			'id',
 			'{{%elements}}',
-			'id',
-			'CASCADE',
-			null
-		);
-	}
-
-	private function _submissions ()
-	{
-		if ($this->db->tableExists(self::SUBMISSIONS_TABLE_NAME))
-			return;
-
-		$this->createTable(self::SUBMISSIONS_TABLE_NAME, [
-			'id'    => $this->primaryKey(),
-
-			'formId' => $this->integer()->notNull(),
-			'title' => $this->string()->notNull(),
-			'ipAddress' => $this->string()->null(),
-			'userAgent' => $this->string()->null(),
-
-			'dateCreated' => $this->dateTime()->notNull(),
-			'dateUpdated' => $this->dateTime()->notNull(),
-			'uid'         => $this->uid(),
-		]);
-
-		$this->addForeignKey(
-			$this->db->getForeignKeyName(self::SUBMISSIONS_TABLE_NAME, 'id'),
-			self::SUBMISSIONS_TABLE_NAME,
-			'id',
-			'{{%elements}}',
-			'id',
-			'CASCADE',
-			null
-		);
-
-		$this->addForeignKey(
-			$this->db->getForeignKeyName(self::SUBMISSIONS_TABLE_NAME, 'formId'),
-			self::SUBMISSIONS_TABLE_NAME,
-			'id',
-			self::FORMS_TABLE_NAME,
 			'id',
 			'CASCADE',
 			null
