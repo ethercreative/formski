@@ -4723,7 +4723,46 @@ function () {
 
         case "description":
           {
-            field.innerHTML = Builder.md.makeHtml(value);
+            field.firstElementChild.innerHTML = Builder.md.makeHtml(value);
+            break;
+          }
+
+        case "options":
+          {
+            // Remove old values that aren't in new
+            _toConsumableArray(field.querySelectorAll("input:not([type='hidden']), option")).forEach(function (i) {
+              if (i.nodeName.toLowerCase() === "option") i.parentNode.removeChild(i);else i.parentNode.parentNode.removeChild(i.parentNode);
+            }); // Add new values
+
+
+            var inputType = field.dataset.type;
+
+            switch (inputType) {
+              case "dropdown":
+                {
+                  var select = field.querySelector("select");
+                  value.forEach(function (v) {
+                    select.appendChild(Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("option", {
+                      value: v.value,
+                      selected: v.default === "1"
+                    }, v.label));
+                  });
+                  break;
+                }
+
+              default:
+                {
+                  value.forEach(function (v) {
+                    field.insertBefore(Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("label", {}, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
+                      type: inputType,
+                      value: v.value,
+                      checked: v.default === "1"
+                    }), " ", Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("span", {}, v.label)]), field.lastElementChild);
+                  });
+                  break;
+                }
+            }
+
             break;
           }
       }
@@ -4776,12 +4815,16 @@ function () {
                 name = _arr2$_i[0],
                 value = _arr2$_i[1];
 
+            var target = {
+              value: value
+            };
+            if (name === "required") target = {
+              checked: value
+            };else if (name === "options") target = {
+              value: Object.values(value)
+            };
             this.onSettingChange(field, name, {
-              target: name === "required" ? {
-                checked: value
-              } : {
-                value: value
-              }
+              target: target
             });
           }
         }
@@ -4957,11 +5000,11 @@ function () {
 
       if (fieldSettings === null) {
         fieldSettings = {
-          label: "Label",
-          handle: ""
+          label: "Label"
         };
 
         if (type !== "heading" && type !== "description") {
+          fieldSettings.handle = "";
           fieldSettings.instructions = "";
           fieldSettings.required = false;
         }
@@ -4983,7 +5026,7 @@ function () {
             fieldSettings.options = [{
               label: "Label",
               value: "value",
-              default: false
+              default: "0"
             }];
             break;
 
@@ -5092,7 +5135,8 @@ function () {
       var labelId = "label" + this.getUid(10),
           onSettingChange = this.onSettingChange.bind(this, uiField, name);
       var inputName = "fieldSettings[".concat(uid, "][").concat(name, "]");
-      var f;
+      var f,
+          cls = "field";
 
       if (name === "type") {
         f = Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
@@ -5120,13 +5164,13 @@ function () {
         f = Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("textarea", {
           class: "text fullwidth",
           name: inputName,
-          value: value,
           input: function input(e) {
             e.target.style.height = "";
             e.target.style.height = e.target.scrollHeight + "px";
             onSettingChange(e);
           }
-        });
+        }, value);
+        cls += " wide";
       } else {
         switch (type) {
           case "boolean":
@@ -5146,7 +5190,8 @@ function () {
             }
 
           case "object":
-            f = document.createTextNode("TODO: Table");
+            f = this.createSettingsTable(type, inputName, value, onSettingChange);
+            cls += " wide";
             break;
 
           default:
@@ -5164,7 +5209,7 @@ function () {
       }
 
       return Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
-        class: "field"
+        class: cls
       }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
         class: "heading"
       }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("label", {
@@ -5203,6 +5248,111 @@ function () {
       }
 
       return null;
+    } // Helpers: Table
+    // -------------------------------------------------------------------------
+
+  }, {
+    key: "createSettingsTable",
+    value: function createSettingsTable(type, name, value, onSettingChange) {
+      var _this3 = this;
+
+      var self = null,
+          body = null;
+
+      var onChange = function onChange() {
+        var out = {};
+        var fields = self.querySelectorAll("input, textarea");
+
+        for (var i = 0, l = fields.length; i < l; ++i) {
+          var field = fields[i];
+
+          var _type = field.getAttribute("type");
+
+          var _value = _type === "checkbox" ? field.checked : field.value;
+
+          var _$exec = /.*(\[.*]){2}\[(.*)]\[(.*)]/.exec(field.getAttribute("name")),
+              _$exec2 = _slicedToArray(_$exec, 4),
+              key = _$exec2[2],
+              _name = _$exec2[3];
+
+          if (!out.hasOwnProperty(key)) out[key] = {};
+          out[key][_name] = _value;
+        }
+
+        onSettingChange({
+          target: {
+            value: Object.values(out)
+          }
+        });
+      };
+
+      var table = Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("table", {
+        class: "shadow-box editable",
+        ref: function ref(el) {
+          self = el;
+        }
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("thead", {}, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("tr", {}, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("th", {}, "Label"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("th", {}, "Value"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("th", {}, "Default?"), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("th", {}, "")])]), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("tbody", {
+        ref: function ref(el) {
+          body = el;
+        }
+      }, Object.values(value).map(function (value) {
+        return _this3.createTableRow(name, value, onChange);
+      }))]);
+      return [table, Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("div", {
+        class: "btn add icon",
+        click: function click() {
+          body.appendChild(_this3.createTableRow(name, null, onChange));
+        }
+      }, "Add an option")];
+    }
+  }, {
+    key: "createTableRow",
+    value: function createTableRow(name, value, onChange) {
+      var id = this.getUid();
+      name = name + "[" + this.getUid() + "]";
+      var self = null;
+      return Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("tr", {
+        ref: function ref(el) {
+          self = el;
+        }
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("td", {
+        class: "textual"
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("textarea", {
+        rows: 1,
+        input: onChange,
+        name: name + "[label]"
+      }, value ? value.label : "")]), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("td", {
+        class: "textual"
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("textarea", {
+        rows: 1,
+        input: onChange,
+        name: name + "[value]"
+      }, value ? value.value : "")]), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("td", {
+        class: "thin"
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
+        type: "hidden",
+        value: "0",
+        name: name + "[default]"
+      }), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("input", {
+        type: "checkbox",
+        value: "1",
+        checked: value ? value.default === "1" : false,
+        id: id,
+        change: onChange,
+        name: name + "[default]"
+      }), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("label", {
+        for: id
+      })]), Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("td", {
+        class: "thin action"
+      }, [Object(_helpers_h__WEBPACK_IMPORTED_MODULE_0__["default"])("a", {
+        class: "delete icon",
+        title: "Delete",
+        role: "button",
+        click: function click() {
+          self.parentNode.removeChild(self);
+          onChange();
+        }
+      })])]);
     }
   }]);
 

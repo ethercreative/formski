@@ -44,12 +44,22 @@
 {% block content %}
 
 	{% for uid, settings in submission.form.fieldSettings %}
-		{% set value %}
-			<p>{{ submission[uid] }}</p>
-		{% endset %}
-		{{ forms.field({
-			label: settings['label']
-		}, value) }}
+		{% if settings['_type'] in ['heading', 'description'] %}
+			{% if settings['_type'] == 'heading' %}
+				<h1>{{ settings['label'] }}</h1>
+			{% else %}
+				{{ forms.field({
+					label: 'Description'
+				}, settings['description']|md) }}
+			{% endif %}
+		{% else %}
+			{% set value %}
+				<p>{{ submission[uid] ?? '' }}</p>
+			{% endset %}
+			{{ forms.field({
+				label: settings['label']
+			}, value) }}
+		{% endif %}
 	{% endfor %}
 
 {% endblock %}

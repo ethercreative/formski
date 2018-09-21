@@ -6,8 +6,8 @@
 	{ label: 'Forms'|t('formski'), url: url('formski/forms') }
 ] %}
 
-{% macro formskiLabel (children, noInstr = false) %}
-	<div class="formski-field">
+{% macro formskiLabel (children, noInstr = false, type = null) %}
+	<div class="formski-field"{% if type %} data-type="{{ type }}"{% endif %}>
 		<div class="formski-field-label">
 			Label
 		</div>
@@ -41,6 +41,12 @@
 {% endblock %}
 
 {% block content %}
+
+	{#{% if form is defined %}
+		<div style="grid-column: span 12">
+			<pre><code>{{ dump(form.getErrors()) }}</code></pre>
+		</div>
+	{% endif %}#}
 
 	<ul class="formski-fields" id="formskiFields">
 		<li class="formski-fields-heading">Fields</li>
@@ -145,14 +151,14 @@
 				}) }}
 
 				{{ forms.dateTimeField({
-					label: 'Date Due'|t('formski'),
+					label: 'Date Due <div class="info">When the form must be completed by for existing users.</div>'|t('formski'),
 					id: 'dateDue',
 					name: 'dateDue',
 					value: form is defined ? form.dateDue,
 				}) }}
 
 				{{ forms.textField({
-					label: 'Days to Complete'|t('formski'),
+					label: 'Days to Complete <div class="info">When the form must be completed by for new users.</div>'|t('formski'),
 					type: 'number',
 					value: form is defined ? form.daysToComplete,
 				}) }}
@@ -217,27 +223,27 @@
 				<span></span>
 			</label>
 		{% endset %}
-		{{ _.formskiLabel(formskiDropdown) }}
+		{{ _.formskiLabel(formskiDropdown, false, 'dropdown') }}
 	</template>
 
 	<template data-formski-field="radio">
 		{% set formskiRadio %}
 			<label>
-				<input type="radio">
+				<input type="radio" value="value">
 				<span>Label</span>
 			</label>
 		{% endset %}
-		{{ _.formskiLabel(formskiRadio) }}
+		{{ _.formskiLabel(formskiRadio, false, 'radio') }}
 	</template>
 
 	<template data-formski-field="checkbox">
 		{% set formskiCheckbox %}
 			<label>
-				<input type="checkbox">
+				<input type="checkbox" value="value">
 				<span>Label</span>
 			</label>
 		{% endset %}
-		{{ _.formskiLabel(formskiCheckbox) }}
+		{{ _.formskiLabel(formskiCheckbox, false, 'checkbox') }}
 	</template>
 
 	<template data-formski-field="acceptance">
@@ -259,8 +265,10 @@
 	</template>
 
 	<template data-formski-field="description">
-		<div class="formski-field formski-field-md">
-			<p>Enter your description</p>
+		<div class="formski-field">
+			<div class="formski-field-md">
+				<p>Enter your description</p>
+			</div>
 		</div>
 	</template>
 {% endblock %}

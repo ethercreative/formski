@@ -72,11 +72,12 @@ class Builder {
 
 					// Update field UI based of settings
 					for (let [name, value] of Object.entries(settings)) {
-						this.onSettingChange(
-							field,
-							name,
-							{ target: name === "required" ? { checked: value } : { value } }
-						);
+						let target = { value };
+
+						if (name === "required") target = { checked: value };
+						else if (name === "options") target = { value: Object.values(value) };
+
+						this.onSettingChange(field, name, { target });
 					}
 				}
 
@@ -275,10 +276,10 @@ class Builder {
 		if (fieldSettings === null) {
 			fieldSettings = {
 				label: "Label",
-				handle: "",
 			};
 
 			if (type !== "heading" && type !== "description") {
+				fieldSettings.handle = "";
 				fieldSettings.instructions = "";
 				fieldSettings.required = false;
 			}
@@ -296,7 +297,7 @@ class Builder {
 				case "radio":
 				case "checkbox":
 					fieldSettings.options = [
-						{ label: "Label", value: "value", default: false },
+						{ label: "Label", value: "value", default: "0" },
 					];
 					break;
 				case "acceptance":
@@ -462,7 +463,50 @@ class Builder {
 					 .classList[e.target.checked ? "add" : "remove"]("required");
 				break;
 			case "description": {
-				field.innerHTML = Builder.md.makeHtml(value);
+				field.firstElementChild.innerHTML = Builder.md.makeHtml(value);
+				break;
+			}
+			case "options": {
+				// Remove old values that aren't in new
+				[...field.querySelectorAll("input:not([type='hidden']), option")].forEach(i => {
+					if (i.nodeName.toLowerCase() === "option")
+						i.parentNode.removeChild(i);
+					else
+						i.parentNode.parentNode.removeChild(i.parentNode);
+				});
+
+				// Add new values
+				const inputType = field.dataset.type;
+				switch (inputType) {
+					case "dropdown": {
+						const select = field.querySelector("select");
+						value.forEach(v => {
+							select.appendChild(h("option", {
+								value: v.value,
+								selected: v.default === "1",
+							}, v.label));
+						});
+						break;
+					}
+					default: {
+						value.forEach(v => {
+							field.insertBefore(
+								h("label", {}, [
+									h("input", {
+										type: inputType,
+										value: v.value,
+										checked: v.default === "1",
+									}),
+									" ",
+									h("span", {}, v.label),
+								]),
+								field.lastElementChild
+							);
+						});
+						break;
+					}
+				}
+
 				break;
 			}
 		}
@@ -504,7 +548,7 @@ class Builder {
 			, onSettingChange = this.onSettingChange.bind(this, uiField, name);
 
 		const inputName = `fieldSettings[${uid}][${name}]`;
-		let f;
+		let f, cls = "field";
 
 		if (name === "type") {
 			f = h("div", { class: "select" }, [
@@ -527,13 +571,14 @@ class Builder {
 			f = h("textarea", {
 				class: "text fullwidth",
 				name: inputName,
-				value,
 				input: (e) => {
 					e.target.style.height = "";
 					e.target.style.height = e.target.scrollHeight + "px";
 					onSettingChange(e);
 				}
-			});
+			}, value);
+
+			cls += " wide";
 		} else {
 			switch (type) {
 				case "boolean": {
@@ -554,7 +599,8 @@ class Builder {
 					break;
 				}
 				case "object":
-					f = document.createTextNode("TODO: Table");
+					f = this.createSettingsTable(type, inputName, value, onSettingChange);
+					cls += " wide";
 					break;
 				default: {
 					f = h("input", {
@@ -569,7 +615,7 @@ class Builder {
 			}
 		}
 
-		return h("div", { class: "field" }, [
+		return h("div", { class: cls }, [
 			h("div", { class: "heading" }, [
 				h("label", { id: labelId }, this.capitalize(name)),
 			]),
@@ -600,6 +646,122 @@ class Builder {
 				return row.childNodes[i];
 
 		return null;
+	}
+
+	// Helpers: Table
+	// -------------------------------------------------------------------------
+
+	createSettingsTable (type, name, value, onSettingChange) {
+		let self = null,
+			body = null;
+
+		const onChange = () => {
+			const out = {};
+			const fields = self.querySelectorAll("input, textarea");
+
+			for (let i = 0, l = fields.length; i < l; ++i) {
+				const field = fields[i];
+				const type = field.getAttribute("type");
+				const value = type === "checkbox" ? field.checked : field.value;
+
+				const [,, key, name] =
+					/.*(\[.*]){2}\[(.*)]\[(.*)]/.exec(field.getAttribute("name"));
+
+				if (!out.hasOwnProperty(key)) out[key] = {};
+				out[key][name] = value;
+			}
+
+			onSettingChange({ target: { value: Object.values(out) } });
+		};
+
+		const table = h("table", {
+			class: "shadow-box editable",
+			ref: el => { self = el; }
+		}, [
+			h("thead", {}, [
+				h("tr", {}, [
+					h("th", {}, "Label"),
+					h("th", {}, "Value"),
+					h("th", {}, "Default?"),
+					h("th", {}, ""),
+				]),
+			]),
+			h("tbody", {
+				ref: el => { body = el; }
+			}, Object.values(value).map(value => (
+				this.createTableRow(name, value, onChange)
+			))),
+		]);
+
+		return [
+			table,
+			h("div", {
+				class: "btn add icon",
+				click: () => {
+					body.appendChild(this.createTableRow(name, null, onChange));
+				}
+			}, "Add an option"),
+		];
+	}
+
+	createTableRow (name, value, onChange) {
+		const id = this.getUid();
+		name = name + "[" + this.getUid() + "]";
+		let self = null;
+
+		return h("tr", {
+			ref: el => { self = el; }
+		}, [
+			h("td", {
+				class: "textual",
+			}, [
+				h("textarea", {
+					rows: 1,
+					input: onChange,
+					name: name + "[label]",
+				}, value ? value.label: ""),
+			]),
+			h("td", {
+				class: "textual",
+			}, [
+				h("textarea", {
+					rows: 1,
+					input: onChange,
+					name: name + "[value]",
+				}, value ? value.value: ""),
+			]),
+			h("td", {
+				class: "thin",
+			}, [
+				h("input", {
+					type: "hidden",
+					value: "0",
+					name: name + "[default]",
+				}),
+				h("input", {
+					type: "checkbox",
+					value: "1",
+					checked: value ? value.default === "1" : false,
+					id,
+					change: onChange,
+					name: name + "[default]",
+				}),
+				h("label", { for: id }),
+			]),
+			h("td", {
+				class: "thin action"
+			}, [
+				h("a", {
+					class: "delete icon",
+					title: "Delete",
+					role: "button",
+					click: () => {
+						self.parentNode.removeChild(self);
+						onChange();
+					}
+				}),
+			]),
+		]);
 	}
 
 }

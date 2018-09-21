@@ -51,10 +51,11 @@ class FormService extends Component
 			// Add columns to the table
 			$fields = [];
 			foreach ($form->fieldSettings as $fieldUid => $setting)
-				$fields[$fieldUid] = [
-					'type' => $setting['_type'],
-					'required' => $setting['required'],
-				];
+				if (!in_array($setting['_type'], ['heading', 'description']))
+					$fields[$fieldUid] = [
+						'type' => $setting['_type'],
+						'required' => $setting['required'],
+					];
 
 			$migration = new UpdateSubmissionTableColumns(
 				compact('tableName', 'fields')

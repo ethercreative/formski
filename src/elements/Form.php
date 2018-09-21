@@ -217,9 +217,10 @@ class Form extends Element
 		// Convert required to a bool
 		if ($this->fieldSettings !== null)
 			foreach ($this->fieldSettings as $key => $setting)
-				$this->fieldSettings[$key]['required'] = boolval(
-					$this->fieldSettings[$key]['required']
-				);
+				if (array_key_exists('required', $this->fieldSettings[$key]))
+					$this->fieldSettings[$key]['required'] = boolval(
+						$this->fieldSettings[$key]['required']
+					);
 	}
 
 	public function extraFields ()
