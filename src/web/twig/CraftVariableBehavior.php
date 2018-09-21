@@ -9,6 +9,7 @@
 namespace ether\formski\web\twig;
 
 use ether\formski\elements\Form;
+use ether\formski\elements\Submission;
 use yii\base\Behavior;
 
 /**
@@ -23,6 +24,16 @@ class CraftVariableBehavior extends Behavior
 	public function forms ($criteria = null)
 	{
 		$query = Form::find();
+
+		if ($criteria)
+			\Craft::configure($query, $criteria);
+
+		return $query;
+	}
+
+	public function submissions ($criteria = null)
+	{
+		$query = Submission::find();
 
 		if ($criteria)
 			\Craft::configure($query, $criteria);
