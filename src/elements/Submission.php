@@ -192,8 +192,18 @@ class Submission extends Element
 		$rules[] = [['formId'], 'required'];
 
 		foreach ($this->form->fieldSettings as $uid => $settings)
-			if ($settings['required'])
+		{
+			if (!empty($settings['required']))
 				$rules[] = [[$uid], 'required'];
+
+			if ($settings['_type'] === 'acceptance')
+				$rules[] = [
+					[$uid],
+					'required',
+					'requiredValue' => '1',
+					'message'       => 'You must accept!'
+				];
+		}
 
 		return $rules;
 	}

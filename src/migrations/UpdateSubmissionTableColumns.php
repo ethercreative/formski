@@ -54,8 +54,10 @@ class UpdateSubmissionTableColumns extends Migration
 					break;
 				case 'dropdown':
 				case 'radio':
-				case 'checkbox':
 					$columnType = $this->char(255);
+					break;
+				case 'checkbox':
+					$columnType = $this->json();
 					break;
 				case 'acceptance':
 					$columnType = $this->boolean();
