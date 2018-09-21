@@ -7,3 +7,6 @@ build.config.js export-ignore
 README.md export-ignore
 CHANGELOG.md export-ignore
 LICENSE export-ignore
+package.json export-ignore
+shrinkwrap.yaml export-ignore
+build.config.js export-ignore
