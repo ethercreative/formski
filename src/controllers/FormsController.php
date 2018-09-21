@@ -32,7 +32,13 @@ class FormsController extends Controller
 
 	public function actionSend ()
 	{
-		\Craft::dd($_POST);
+		$this->requirePostRequest();
+		$request = \Craft::$app->request;
+
+		$formId = $request->getRequiredBodyParam('formId');
+		$fields = $request->getRequiredBodyParam('fields');
+
+		\Craft::dd(compact('formId', 'fields'));
 	}
 
 	// Internal

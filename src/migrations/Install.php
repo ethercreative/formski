@@ -23,7 +23,7 @@ class Install extends Migration
 	// =========================================================================
 
 	const FORMS_TABLE_NAME = '{{%formski_forms}}';
-//	const FORMS_USERGROUPS_JUNCTION = '{{%formski_forms_usergroups}}';
+	const SUBMISSIONS_TABLE_NAME = '{{%formski_submissions}}';
 
 	// Methods
 	// =========================================================================
@@ -34,12 +34,16 @@ class Install extends Migration
 	public function safeUp ()
 	{
 		$this->_forms();
+		$this->_submissions();
 	}
 
 	public function safeDown ()
 	{
 		// Drop Forms Table
 		$this->dropTableIfExists(self::FORMS_TABLE_NAME);
+
+		// Drop Submissions Table
+		$this->dropTableIfExists(self::SUBMISSIONS_TABLE_NAME);
 
 		// Drop form content tables
 		foreach (\Craft::$app->db->schema->tableNames as $tableName)
@@ -56,7 +60,7 @@ class Install extends Migration
 			return;
 
 		$this->createTable(self::FORMS_TABLE_NAME, [
-			'id' => $this->primaryKey(),
+			'id'     => $this->primaryKey(),
 			'handle' => $this->char(5)->notNull(),
 
 			'authorId' => $this->integer()->notNull(),
@@ -83,50 +87,45 @@ class Install extends Migration
 			'CASCADE',
 			null
 		);
+	}
 
-		// TODO: User Group relations
-//		$this->createTable(self::FORMS_USERGROUPS_JUNCTION, [
-//			'id'          => $this->primaryKey(),
-//			'groupId'     => $this->integer()->notNull(),
-//			'formId'      => $this->integer()->notNull(),
-//			'dateCreated' => $this->dateTime()->notNull(),
-//			'dateUpdated' => $this->dateTime()->notNull(),
-//			'uid'         => $this->uid(),
-//		]);
-//
-//		$this->createIndex(
-//			null,
-//			self::FORMS_USERGROUPS_JUNCTION,
-//			['groupId', 'formId'],
-//			true
-//		);
-//
-//		$this->createIndex(
-//			null,
-//			self::FORMS_USERGROUPS_JUNCTION,
-//			['formId'],
-//			false
-//		);
-//
-//		$this->addForeignKey(
-//			null,
-//			self::FORMS_USERGROUPS_JUNCTION,
-//			['groupId'],
-//			'{{%usergroups}}',
-//			['id'],
-//			'CASCADE',
-//			null
-//		);
-//
-//		$this->addForeignKey(
-//			null,
-//			self::FORMS_USERGROUPS_JUNCTION,
-//			['formId'],
-//			self::FORMS_TABLE_NAME,
-//			['id'],
-//			'CASCADE',
-//			null
-//		);
+	private function _submissions ()
+	{
+		if ($this->db->tableExists(self::SUBMISSIONS_TABLE_NAME))
+			return;
+
+		$this->createTable(self::SUBMISSIONS_TABLE_NAME, [
+			'id'    => $this->primaryKey(),
+
+			'formId' => $this->integer()->notNull(),
+			'title' => $this->string()->notNull(),
+			'ipAddress' => $this->string()->null(),
+			'userAgent' => $this->string()->null(),
+
+			'dateCreated' => $this->dateTime()->notNull(),
+			'dateUpdated' => $this->dateTime()->notNull(),
+			'uid'         => $this->uid(),
+		]);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName(self::SUBMISSIONS_TABLE_NAME, 'id'),
+			self::SUBMISSIONS_TABLE_NAME,
+			'id',
+			'{{%elements}}',
+			'id',
+			'CASCADE',
+			null
+		);
+
+		$this->addForeignKey(
+			$this->db->getForeignKeyName(self::SUBMISSIONS_TABLE_NAME, 'formId'),
+			self::SUBMISSIONS_TABLE_NAME,
+			'id',
+			self::FORMS_TABLE_NAME,
+			'id',
+			'CASCADE',
+			null
+		);
 	}
 
 }
