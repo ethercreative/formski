@@ -1,7 +1,7 @@
 {
   "name": "ether/formski",
   "description": "A form building plugin for Craft CMS",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "type": "craft-plugin",
   "license": "proprietary",
   "authors": [

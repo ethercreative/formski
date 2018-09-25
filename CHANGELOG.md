@@ -1,3 +1,7 @@
+## 1.0.0-alpha.4 - 2018-08-25
+### Added
+- Added form relational field
+
 ## 1.0.0-alpha.3 - 2018-08-21
 ### Added
 - Added `{% craft.submissions.form(form).userId(userId).all() %}`
