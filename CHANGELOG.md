@@ -1,3 +1,7 @@
+## 1.0.0-alpha.5 - 2018-08-25
+### Fixed
+- Actually registering the field this time 😐 
+
 ## 1.0.0-alpha.4 - 2018-08-25
 ### Added
 - Added form relational field

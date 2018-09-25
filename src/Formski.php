@@ -12,10 +12,12 @@ use craft\base\Plugin;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\Elements;
+use craft\services\Fields;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use ether\formski\elements\Form;
 use ether\formski\elements\Submission;
+use ether\formski\fields\FormField;
 use ether\formski\services\FormService;
 use ether\formski\services\SubmissionService;
 use ether\formski\web\twig\CraftVariableBehavior;
@@ -82,6 +84,12 @@ class Formski extends Plugin
 			Elements::EVENT_REGISTER_ELEMENT_TYPES,
 			[$this, 'onRegisterElementTypes']
 		);
+
+		Event::on(
+			Fields::class,
+			Fields::EVENT_REGISTER_FIELD_TYPES,
+			[$this, 'onRegisterFieldTypes']
+		);
 	}
 
 	// Events
@@ -110,6 +118,11 @@ class Formski extends Plugin
 	{
 		$event->types[] = Form::class;
 		$event->types[] = Submission::class;
+	}
+
+	public function onRegisterFieldTypes (RegisterComponentTypesEvent $event)
+	{
+		$event->types[] = FormField::class;
 	}
 
 	// Getters
