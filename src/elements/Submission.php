@@ -223,7 +223,7 @@ class Submission extends Element
 		$labels = parent::attributeLabels();
 
 		foreach ($this->form->fieldSettings as $uid => $field)
-			$labels[$uid] = $field['label'];
+			$labels[$uid] = array_key_exists('label', $field) ? $field['label'] : 'Not Labeled';
 
 		return $labels;
 	}

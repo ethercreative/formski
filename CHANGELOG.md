@@ -1,3 +1,7 @@
+## 1.0.0-alpha.7 - 2018-08-25
+### Fixed
+- Submission accounts for fields without labels
+
 ## 1.0.0-alpha.6 - 2018-08-25
 ### Added
 - Added `overdue(User $user)` method to Forms
