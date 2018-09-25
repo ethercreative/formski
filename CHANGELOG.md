@@ -1,3 +1,10 @@
+## 1.0.0-alpha.6 - 2018-08-25
+### Added
+- Added `overdue(User $user)` method to Forms
+
+### Fixed
+- Fixed `Days to Complete` not saving
+
 ## 1.0.0-alpha.5 - 2018-08-25
 ### Fixed
 - Actually registering the field this time 😐 

@@ -268,6 +268,33 @@ class Form extends Element
 		return Json::encode($form);
 	}
 
+	/**
+	 * Checks if the form is overdue for the given user. Does **not** check if
+	 * the user has any submissions for this form.
+	 *
+	 * @param User $user
+	 *
+	 * @return bool
+	 */
+	public function overdue (User $user)
+	{
+		if (!$this->dateDue || !$this->daysToComplete)
+			return false;
+
+		$now = new \DateTime();
+
+		// If the user was created before the form
+		if ($user->dateCreated < $this->dateCreated) {
+			if ($now > $this->dateDue) return true;
+		} else {
+			$end = $user->dateCreated;
+			$end->modify('+' . $this->daysToComplete . ' days');
+			if ($now > $end) return true;
+		}
+
+		return false;
+	}
+
 	// Methods: Routing
 	// -------------------------------------------------------------------------
 

@@ -160,6 +160,7 @@
 				{{ forms.textField({
 					label: 'Days to Complete <div class="info">When the form must be completed by for new users.</div>'|t('formski'),
 					type: 'number',
+					name: 'daysToComplete',
 					value: form is defined ? form.daysToComplete,
 				}) }}
 
