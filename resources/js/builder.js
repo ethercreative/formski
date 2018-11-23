@@ -384,7 +384,7 @@ class Builder {
 	onDropZoneDragOver = (zone, e) => {
 		e.preventDefault();
 
-		if (![...event.dataTransfer.types].includes("text/field"))
+		if (![...e.dataTransfer.types].includes("text/field"))
 			return;
 
 		zone.classList.add("drop");

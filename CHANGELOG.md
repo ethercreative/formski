@@ -1,3 +1,7 @@
+## 1.0.0-alpha.9 - 2018-11-23
+### Fixed
+- Fixed JS error when dragging new form fields
+
 ## 1.0.0-alpha.8 - 2018-11-23
 ### Improved
 - Builder fields list and settings now sticky
