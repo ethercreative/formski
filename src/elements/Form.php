@@ -107,6 +107,9 @@ class Form extends Element
 		return true;
 	}
 
+	/**
+	 * @return FormQuery
+	 */
 	public static function find (): ElementQueryInterface
 	{
 		return new FormQuery(self::class);
@@ -272,11 +275,12 @@ class Form extends Element
 	 * Checks if the form is overdue for the given user. Does **not** check if
 	 * the user has any submissions for this form.
 	 *
-	 * @param User $user
+	 * @param \DateTime $date
 	 *
 	 * @return bool
+	 * @throws \Exception
 	 */
-	public function overdue (User $user)
+	public function overdue (\DateTime $date)
 	{
 		if (!$this->dateDue || !$this->daysToComplete)
 			return false;
@@ -284,10 +288,10 @@ class Form extends Element
 		$now = new \DateTime();
 
 		// If the user was created before the form
-		if ($user->dateCreated < $this->dateCreated) {
+		if ($date < $this->dateCreated) {
 			if ($now > $this->dateDue) return true;
 		} else {
-			$end = $user->dateCreated;
+			$end = clone $date;
 			$end->modify('+' . $this->daysToComplete . ' days');
 			if ($now > $end) return true;
 		}

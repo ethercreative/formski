@@ -1,3 +1,10 @@
+## 1.0.0-alpha.10 - 2018-11-26
+### Changed
+- `Form::overdue` now expects `DateTime` as its only argument.
+
+### Improved
+- Form and Submission's Find now type-hints for the correct class.
+
 ## 1.0.0-alpha.9 - 2018-11-23
 ### Fixed
 - Fixed JS error when dragging new form fields

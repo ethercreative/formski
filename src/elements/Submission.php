@@ -124,6 +124,9 @@ class Submission extends Element
 		return true;
 	}
 
+	/**
+	 * @return SubmissionQuery
+	 */
 	public static function find (): ElementQueryInterface
 	{
 		return new SubmissionQuery(self::class);
