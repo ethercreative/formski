@@ -1,3 +1,7 @@
+## 1.0.0-alpha.11 - 2018-11-28
+### Fixed
+- Fixed some content columns not being created when saving a form. **You will need to re-save all your forms!**
+
 ## 1.0.0-alpha.10 - 2018-11-26
 ### Changed
 - `Form::overdue` now expects `DateTime` as its only argument.

@@ -31,63 +31,97 @@ class UpdateSubmissionTableColumns extends Migration
 	// Methods: Public
 	// -------------------------------------------------------------------------
 
+	/**
+	 * @return bool
+	 * @throws \yii\base\Exception
+	 * @throws \yii\base\NotSupportedException
+	 */
 	public function safeUp ()
 	{
 		$columnNames = [];
 		$existingColumns = $this->_getColumns();
 
-		// Add new columns
-		foreach ($this->fields as $uid => $settings)
+		// NOTE: All columns are NULL-able because making a NULL column with
+		// data NOT NULL won't work
+
+		try
 		{
-			$type = $settings['type'];
-			$required = $settings['required'];
 
-			$columnName = 'field_' . $uid;
-			$columnNames[] = $columnName;
+			// Add new columns
+			foreach ($this->fields as $uid => $settings)
+			{
+				$type = $settings['type'];
 
-			switch ($type) {
-				case 'text':
-					$columnType = $this->text();
-					break;
-				case 'textarea':
-					$columnType = $this->mediumText();
-					break;
-				case 'dropdown':
-				case 'radio':
-					$columnType = $this->char(255);
-					break;
-				case 'checkbox':
-					$columnType = $this->json();
-					break;
-				case 'acceptance':
-					$columnType = $this->boolean();
-					break;
-				default:
-					continue 2;
+				$columnName = 'field_' . $uid;
+				$columnNames[] = $columnName;
+
+				switch ($type)
+				{
+					case 'text':
+						$columnType = $this->text();
+						break;
+					case 'textarea':
+						$columnType = $this->mediumText();
+						break;
+					case 'dropdown':
+					case 'radio':
+						$columnType = $this->text();
+						break;
+					case 'checkbox':
+						$columnType = $this->json();
+						break;
+					case 'acceptance':
+						$columnType = $this->boolean();
+						break;
+					default:
+						continue 2;
+				}
+
+
+				if ($this->_columnExists($columnName))
+				{
+					// $this->alterColumn is broken for Postgres in Yii2's schema
+					// builder, so we have to alter the column manually
+					if ($this->db->getIsPgsql())
+					{
+						$table = $this->db->schema->getRawTableName(
+							$this->tableName
+						);
+
+						$sql = <<<SQL
+ALTER TABLE "{$table}"
+ALTER "{$columnName}" TYPE {$columnType},
+ALTER "{$columnName}" DROP NOT NULL;
+SQL;
+
+						$this->execute($sql);
+					}
+					else
+					{
+						$this->alterColumn(
+							$this->tableName,
+							$columnName,
+							$columnType->null()
+						);
+					}
+				}
+				else
+				{
+					$this->addColumn(
+						$this->tableName,
+						$columnName,
+						$columnType->null()
+					);
+				}
 			}
 
-			if ($required) $columnType = $columnType->notNull();
-			else $columnType = $columnType->null();
-
-			if ($this->_columnExists($columnName)) {
-				$this->alterColumn(
-					$this->tableName,
-					$columnName,
-					$columnType
-				);
-			} else {
-				$this->addColumn(
-					$this->tableName,
-					$columnName,
-					$columnType
-				);
-			}
+			// Delete old columns
+			$columnsToDelete = array_diff($existingColumns, $columnNames);
+			foreach ($columnsToDelete as $columnName)
+				$this->dropColumn($this->tableName, $columnName);
+		} catch (\Exception $e) {
+			\Craft::dd($e);
 		}
-
-		// Delete old columns
-		$columnsToDelete = array_diff($existingColumns, $columnNames);
-		foreach ($columnsToDelete as $columnName)
-			$this->dropColumn($this->tableName, $columnName);
 
 		return true;
 	}

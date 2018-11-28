@@ -69,7 +69,7 @@ class FormsController extends Controller
 			\Craft::$app->session->setError(
 				\Craft::t('formski', 'Unable to save submission!')
 			);
-
+			
 			\Craft::$app->urlManager->setRouteParams([
 				'submission' => $submission,
 			]);
